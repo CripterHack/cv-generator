@@ -1,0 +1,11 @@
+Metadata-Version: 2.1
+Name: cv-generator
+Version: 0.1.0
+Summary: A Python application to generate CVs
+Requires-Python: >=3.11.5
+License-File: LICENSE
+Requires-Dist: Pillow>=9.5.0
+Requires-Dist: Jinja2>=3.1.2
+Requires-Dist: pdfkit>=1.0.0
+Requires-Dist: markdown2>=2.4.8
+Requires-Dist: reportlab>=3.6.12

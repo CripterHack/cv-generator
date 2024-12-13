@@ -18,17 +18,65 @@ import markdown2
 import pdfkit
 
 class Curriculum:
+    """
+    Main class for curriculum generation and management.
+    
+    Attributes:
+        root (tk.Tk): Main window of the application
+        data_file (str): Path to the JSON data file
+        current_language (str): Current language ('en' or 'es')
+        professional_experience (list): List of professional experiences
+        academic_experience (list): List of academic experiences
+        skills (list): List of skills
+        certificates (list): List of certificates
+    
+    Methods:
+        setup_gui(): Configures the GUI
+        generate_curriculum(): Generates the CV in HTML format
+        export_as_pdf(): Exports the CV to PDF format
+        export_as_markdown(): Exports the CV to Markdown format
+    """
     def __init__(self):
         """Initializes the Curriculum class and sets up the GUI."""
         self.is_data_modified = False
         self.root = tk.Tk()
-        self.root.title("Curriculum Generator")
-        self.root.geometry("900x750")
-        self.languages = self.get_languages()
-        self.current_language = "en"
+        self.root.geometry("1280x820")
+        self.root.title("CV Generator")
+        
+        # Configure style
+        self.root.configure(bg='#f0f0f0')  # White background
+        self.style = {
+            'bg_color': '#f0f0f0',         # White background
+            'accent_color': '#2292a7',     # New primary color
+            'text_color': '#000000',       # Black text
+            'font_family': 'Open Sans',    # Apple's preferred font
+            'padding': 20,
+            'button_radius': 5             # Border radius for buttons
+        }
+        
+        # Configure default styles for widgets
+        self.root.option_add('*Button.background', self.style['accent_color'])
+        self.root.option_add('*Button.foreground', '#f0f0f0')
+        self.root.option_add('*Button.font', (self.style['font_family'], 10))
+        self.root.option_add('*Button.relief', 'flat')
+        self.root.option_add('*Button.padx', 15)
+        self.root.option_add('*Button.pady', 8)
+        self.root.option_add('*Button.borderwidth', 0)
+        
+        self.root.option_add('*Entry.font', (self.style['font_family'], 10))
+        self.root.option_add('*Entry.relief', 'flat')
+        self.root.option_add('*Entry.background', '#f5f5f7')  # Light gray background
+        
+        self.root.option_add('*Label.font', (self.style['font_family'], 10))
+        self.root.option_add('*Label.background', self.style['bg_color'])
+        self.root.option_add('*Label.foreground', self.style['text_color'])
+        
+        # Initialize other attributes
         self.data_file = "curriculum_data.json"
         self.foto_encoded = ""
         self.mostrar_foto = tk.BooleanVar(value=False)
+        self.languages = self.get_languages()
+        self.current_language = "en"
         self.professional_experience = []
         self.academic_experience = []
         self.skills = []
@@ -50,21 +98,51 @@ class Curriculum:
         # Language Toggle Button
         self.language_button = self.create_button(left_frame, self.languages[self.current_language]["language_toggle"], self.toggle_language, 0)
 
-        # Personal Information
+        # Personal Information Labels
+        self.name_label = tk.Label(left_frame, text=self.languages[self.current_language]["name"], 
+                                 bg=self.style['bg_color'], font=(self.style['font_family'], 10))
+        self.name_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
+        self.title_label = tk.Label(left_frame, text=self.languages[self.current_language]["title"], 
+                                  bg=self.style['bg_color'], font=(self.style['font_family'], 10))
+        self.title_label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
+
+        self.phone_label = tk.Label(left_frame, text=self.languages[self.current_language]["phone"], 
+                                  bg=self.style['bg_color'], font=(self.style['font_family'], 10))
+        self.phone_label.grid(row=3, column=0, padx=10, pady=10, sticky="w")
+
+        self.age_label = tk.Label(left_frame, text=self.languages[self.current_language]["age"], 
+                                bg=self.style['bg_color'], font=(self.style['font_family'], 10))
+        self.age_label.grid(row=4, column=0, padx=10, pady=10, sticky="w")
+
+        self.city_label = tk.Label(left_frame, text=self.languages[self.current_language]["city"], 
+                                 bg=self.style['bg_color'], font=(self.style['font_family'], 10))
+        self.city_label.grid(row=5, column=0, padx=10, pady=10, sticky="w")
+
+        self.summary_label = tk.Label(left_frame, text=self.languages[self.current_language]["summary"], 
+                                    bg=self.style['bg_color'], font=(self.style['font_family'], 10))
+        self.summary_label.grid(row=6, column=0, padx=10, pady=10, sticky="w")
+
+        # Personal Information Entry Fields
+        entry_style = {
+            'font': (self.style['font_family'], 10),
+            'relief': 'solid',  # Borde sólido
+            'borderwidth': 1,   # Grosor del borde de 1px
+            'highlightthickness': 0,  # Eliminar el resaltado adicional
+            'bg': '#ffffff'     # Fondo blanco
+        }
+
         fields = ["name", "title", "phone", "age", "city", "summary"]
         for index, field in enumerate(fields, 1):
-            self.create_entry(left_frame, field, index)
-
-        self.name_label = tk.Label(left_frame, text=self.languages[self.current_language]["name"])
-        self.title_label = tk.Label(left_frame, text=self.languages[self.current_language]["title"])
-        self.phone_label = tk.Label(left_frame, text=self.languages[self.current_language]["phone"])
-        self.age_label = tk.Label(left_frame, text=self.languages[self.current_language]["age"])
-        self.city_label = tk.Label(left_frame, text=self.languages[self.current_language]["city"])
-        self.summary_label = tk.Label(left_frame, text=self.languages[self.current_language]["summary"])
+            entry = tk.Entry(left_frame, **entry_style)
+            entry.grid(row=index, column=1, padx=10, pady=10, sticky="ew")
+            setattr(self, field, entry)
 
         # Other UI elements
         self.photo_button = self.create_button(left_frame, self.languages[self.current_language]["attach_photo"], self.attach_photo, 7)
-        self.checkbox_photo = tk.Checkbutton(left_frame, text=self.languages[self.current_language]["show_photo"], variable=self.mostrar_foto, command=self.update_preview)
+        self.checkbox_photo = tk.Checkbutton(left_frame, text=self.languages[self.current_language]["show_photo"], 
+                                           variable=self.mostrar_foto, command=self.update_preview,
+                                           bg=self.style['bg_color'], font=(self.style['font_family'], 10))
         self.checkbox_photo.grid(row=8, column=1, padx=10, pady=10, sticky="w")
 
         # Add Experience, Skills, Certificates
@@ -76,7 +154,7 @@ class Curriculum:
         # Preview Text Area
         self.setup_preview_area()
 
-        # Footer for GitHub link
+        # Footer for PayPal and GitHub links
         self.create_footer()
 
     def setup_favicon(self):
@@ -105,7 +183,7 @@ class Curriculum:
 
     def create_frame(self, parent, row, col):
         """Creates a Tkinter frame with basic configuration."""
-        frame = tk.Frame(parent, padx=10, pady=10)
+        frame = tk.Frame(parent, padx=self.style['padding'], pady=self.style['padding'], bg=self.style['bg_color'])
         frame.grid(row=row, column=col, sticky="nsew")
         self.root.grid_columnconfigure(col, weight=2 if col == 1 else 1)
         self.root.grid_rowconfigure(row, weight=1)
@@ -113,25 +191,89 @@ class Curriculum:
 
     def create_entry(self, parent, field, row):
         """Creates a labeled entry field with real-time preview binding."""
-        label = tk.Label(parent, text=self.languages[self.current_language][field])
-        label.grid(row=row, column=0, padx=10, pady=10, sticky="w")
-        entry = tk.Entry(parent)
-        entry.grid(row=row, column=1, padx=10, pady=10, sticky="ew")
+        frame = tk.Frame(parent, bg=self.style['bg_color'])
+        frame.grid(row=row, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
+        
+        label = tk.Label(frame, text=self.languages[self.current_language][field], 
+                        font=(self.style['font_family'], 10), bg=self.style['bg_color'])
+        label.pack(side=tk.LEFT, padx=(0, 10))
+        
+        entry = tk.Entry(frame, font=(self.style['font_family'], 10), relief='flat', 
+                        bg='#f5f5f7', insertbackground=self.style['text_color'])
+        entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         entry.bind("<KeyRelease>", lambda e: self.set_data_modified(True))
+        
+        # Add bottom border effect
+        border_frame = tk.Frame(frame, height=2, bg=self.style['accent_color'])
+        border_frame.pack(fill=tk.X, side=tk.BOTTOM)
+        
         setattr(self, field, entry)
 
     def create_button(self, parent, text, command, row):
-        """Creates a Tkinter button."""
-        button = tk.Button(parent, text=text, command=command)
+        """Creates a Tkinter button with rounded corners."""
+        button = tk.Button(
+            parent,
+            text=text,
+            command=command,
+            bg=self.style['accent_color'],
+            fg='#f0f0f0',
+            font=(self.style['font_family'], 10),
+            relief='flat',
+            borderwidth=0,
+            padx=15,
+            pady=8,
+            cursor='hand2'
+        )
         button.grid(row=row, column=1, padx=10, pady=10, sticky="ew")
         return button
 
     def create_section_buttons(self, parent):
-        """Creates buttons for adding experiences, skills, and certificates."""
-        self.professional_experience_button = self.create_button(parent, self.languages[self.current_language]["add_professional_experience"], self.add_professional_experience, 9)
-        self.academic_experience_button = self.create_button(parent, self.languages[self.current_language]["add_academic_experience"], self.add_academic_experience, 10)
-        self.skills_button = self.create_button(parent, self.languages[self.current_language]["add_skills_experience"], self.add_skill, 11)
-        self.certificates_button = self.create_button(parent, self.languages[self.current_language]["add_certificates_experience"], self.add_certificate, 12)
+        """Creates buttons for adding different sections."""
+        section_frame = tk.Frame(parent, bg=self.style['bg_color'])
+        section_frame.grid(row=9, column=0, columnspan=2, pady=15)
+
+        button_style = {
+            'bg': self.style['accent_color'],
+            'fg': '#f0f0f0',
+            'font': (self.style['font_family'], 10),
+            'relief': 'flat',
+            'borderwidth': 0,
+            'padx': 15,
+            'pady': 8,
+            'cursor': 'hand2'
+        }
+
+        self.professional_experience_button = tk.Button(
+            section_frame,
+            text=self.languages[self.current_language]["add_professional_experience"],
+            command=self.add_professional_experience,
+            **button_style
+        )
+        self.professional_experience_button.pack(side=tk.LEFT, padx=5)
+
+        self.academic_experience_button = tk.Button(
+            section_frame,
+            text=self.languages[self.current_language]["add_academic_experience"],
+            command=self.add_academic_experience,
+            **button_style
+        )
+        self.academic_experience_button.pack(side=tk.LEFT, padx=5)
+
+        self.skills_button = tk.Button(
+            section_frame,
+            text=self.languages[self.current_language]["add_skills_experience"],
+            command=self.add_skill,
+            **button_style
+        )
+        self.skills_button.pack(side=tk.LEFT, padx=5)
+
+        self.certificates_button = tk.Button(
+            section_frame,
+            text=self.languages[self.current_language]["add_certificates_experience"],
+            command=self.add_certificate,
+            **button_style
+        )
+        self.certificates_button.pack(side=tk.LEFT, padx=5)
 
     def add_certificate(self):
         """Adds a new certificate."""
@@ -146,67 +288,152 @@ class Curriculum:
 
     def create_main_buttons(self, parent):
         """Creates Load, Save, Clear, and Generate buttons."""
-        button_frame = tk.Frame(parent)
-        button_frame.grid(row=13, column=0, columnspan=2, pady=10)
+        button_frame = tk.Frame(parent, bg=self.style['bg_color'])
+        button_frame.grid(row=13, column=0, columnspan=2, pady=20)
 
-        self.load_button = tk.Button(button_frame, text=self.languages[self.current_language]["load_json"], command=self.load_json_file)
+        # Estilo común para todos los botones
+        button_style = {
+            'bg': self.style['accent_color'],
+            'fg': '#f0f0f0',
+            'relief': 'flat',
+            'borderwidth': 0,
+            'padx': 15,
+            'pady': 8,
+            'cursor': 'hand2'
+        }
+
+        # Estilo para botones secundarios
+        secondary_style = button_style.copy()
+        secondary_style['font'] = (self.style['font_family'], 10)
+
+        # Estilo para botón principal
+        primary_style = button_style.copy()
+        primary_style['font'] = (self.style['font_family'], 11, 'bold')
+
+        self.load_button = tk.Button(
+            button_frame,
+            text=self.languages[self.current_language]["load_json"],
+            command=self.load_json_file,
+            **secondary_style
+        )
         self.load_button.pack(side=tk.LEFT, padx=5)
 
-        self.save_button = tk.Button(button_frame, text=self.languages[self.current_language]["save_changes"], command=self.save_data_from_preview)
+        self.save_button = tk.Button(
+            button_frame,
+            text=self.languages[self.current_language]["save_changes"],
+            command=self.save_data_from_preview,
+            **secondary_style
+        )
         self.save_button.pack(side=tk.LEFT, padx=5)
 
-        self.clear_button = tk.Button(button_frame, text=self.languages[self.current_language]["clear_data"], command=self.clear_data)
+        self.clear_button = tk.Button(
+            button_frame,
+            text=self.languages[self.current_language]["clear_data"],
+            command=self.clear_data,
+            **secondary_style
+        )
         self.clear_button.pack(side=tk.LEFT, padx=5)
 
-        self.generate_button = tk.Button(button_frame, text=self.languages[self.current_language]["generate_cv"], command=self.generate_curriculum)
+        self.generate_button = tk.Button(
+            button_frame,
+            text=self.languages[self.current_language]["generate_cv"],
+            command=self.generate_curriculum,
+            **primary_style
+        )
         self.generate_button.pack(side=tk.LEFT, padx=5)
 
-        self.export_md_button = tk.Button(button_frame, text=self.languages[self.current_language]["export_md"], command=self.export_as_markdown)
+        self.export_md_button = tk.Button(
+            button_frame,
+            text=self.languages[self.current_language]["export_md"],
+            command=self.export_as_markdown,
+            **secondary_style
+        )
         self.export_md_button.pack(side=tk.LEFT, padx=5)
 
-        self.export_pdf_button = tk.Button(button_frame, text=self.languages[self.current_language]["export_pdf"], command=self.export_as_pdf)
+        self.export_pdf_button = tk.Button(
+            button_frame,
+            text=self.languages[self.current_language]["export_pdf"],
+            command=self.export_as_pdf,
+            **secondary_style
+        )
         self.export_pdf_button.pack(side=tk.LEFT, padx=5)
+
+        # Aplicar hover effect a todos los botones
+        for button in [self.load_button, self.save_button, self.clear_button, 
+                      self.generate_button, self.export_md_button, self.export_pdf_button]:
+            self._apply_button_hover(button)
 
     def setup_preview_area(self):
         """Sets up the preview area with a canvas and a scrollbar."""
-        self.preview_canvas = tk.Canvas(self.preview_frame)
-        self.preview_scrollbar = tk.Scrollbar(self.preview_frame, orient="vertical", command=self.preview_canvas.yview)
+        self.preview_frame.configure(bg=self.style['bg_color'])
+        
+        self.preview_canvas = tk.Canvas(self.preview_frame, bg=self.style['bg_color'],
+                                      highlightthickness=0)
+        self.preview_scrollbar = tk.Scrollbar(self.preview_frame, orient="vertical",
+                                            command=self.preview_canvas.yview)
+        
         self.preview_canvas.configure(yscrollcommand=self.preview_scrollbar.set)
-
+        
         self.preview_scrollbar.pack(side="right", fill="y")
         self.preview_canvas.pack(side="left", fill="both", expand=True)
-
-        self.preview_content = tk.Frame(self.preview_canvas)
+        
+        self.preview_content = tk.Frame(self.preview_canvas, bg=self.style['bg_color'])
         self.preview_canvas.create_window((0, 0), window=self.preview_content, anchor='nw')
-
-        self.preview_content.bind("<Configure>", lambda e: self.preview_canvas.configure(scrollregion=self.preview_canvas.bbox("all")))
+        
+        self.preview_content.bind("<Configure>", 
+            lambda e: self.preview_canvas.configure(scrollregion=self.preview_canvas.bbox("all")))
 
     def create_footer(self):
-        """Adds a footer with GitHub link at the bottom of the main window."""
-        footer = tk.Label(self.root, text="GitHub @cripterhack", fg="blue", cursor="hand2")
-        footer.grid(row=2, column=0, columnspan=2, pady=5)
-        footer.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/CripterHack"))
+        """Adds a footer with PayPal and GitHub links at the bottom of the main window."""
+        footer_frame = tk.Frame(self.root, bg=self.style['bg_color'])
+        footer_frame.grid(row=2, column=0, columnspan=2, pady=10)
+
+        # PayPal link
+        self.coffee_link = tk.Label(
+            footer_frame,
+            text=self.languages[self.current_language]["gift_coffee"],
+            fg=self.style['accent_color'],
+            bg=self.style['bg_color'],
+            cursor="hand2",
+            font=(self.style['font_family'], 9)
+        )
+        self.coffee_link.pack(side=tk.LEFT, padx=10)
+        self.coffee_link.bind("<Button-1>", lambda e: webbrowser.open("https://www.paypal.com/paypalme/cripterhack"))
+
+        # GitHub link
+        github_link = tk.Label(
+            footer_frame,
+            text="GitHub @cripterhack",
+            fg=self.style['accent_color'],
+            bg=self.style['bg_color'],
+            cursor="hand2",
+            font=(self.style['font_family'], 9)
+        )
+        github_link.pack(side=tk.LEFT, padx=10)
+        github_link.bind("<Button-1>", lambda e: webbrowser.open("https://github.com/CripterHack/cv-generator"))
 
     def get_languages(self):
         """Returns a dictionary of languages."""
         return {
             "en": {
                 "main_title": "Personal Information", "name": "Name", "title": "Title", "age": "Age", "city": "City", "summary": "Summary",
-                "photo": "Photo", "phone": "Phone / Whatsapp", "attach_photo": "Attach Photo", "show_photo": "Show Photo", "add_professional_experience": "Add Professional Experience", "add_academic_experience": "Add Academic Experience", "add_skills_experience": "Add Skills Experience", "add_certificates_experience": "Add Certificates Experience",
+                "photo": "Photo", "phone": "Phone", "attach_photo": "Attach Photo", "show_photo": "Show Photo", "add_professional_experience": "Add Professional Experience", "add_academic_experience": "Add Academic Experience", "add_skills_experience": "Add Skills Experience", "add_certificates_experience": "Add Certificates Experience",
                 "generate_cv": "Generate CV", "load_json": "Load Data", "save_changes": "Save Changes", "clear_data": "Clear Data",
                 "professional_experience": "Professional Experience", "academic_experience": "Academic Experience",
                 "skills": "Skills", "certificates": "Certificates", "language_toggle": "Cambiar a Español",
                 "company": "Company", "position": "Position", "start_date": "Start Date", "end_date": "End Date", "description": "Description",
-                "institution": "Institution", "degree": "Degree", "new_skill": "New Skill", "remove": "Remove", "date": "Date", "export_md": "Export as Markdown", "export_pdf": "Export as PDF"
+                "institution": "Institution", "degree": "Degree", "new_skill": "New Skill", "remove": "Remove", "date": "Date", "export_md": "Export as Markdown", "export_pdf": "Export as PDF",
+                "gift_coffee": "Gift me a coffee"
             },
             "es": {
                 "main_title": "Información Personal", "name": "Nombre", "title": "Título", "age": "Edad", "city": "Ciudad", "summary": "Resumen",
-                "photo": "Foto", "phone": "Teléfono / Whatsapp", "attach_photo": "Adjuntar Foto", "show_photo": "Mostrar Foto", "add_professional_experience": "Agregar Experiencia Profesional", "add_academic_experience": "Añadir Experiencia Académica", "add_skills_experience": "Agregar Habilidades", "add_certificates_experience": "Agregar Certificados",
+                "photo": "Foto", "phone": "Teléfono", "attach_photo": "Adjuntar Foto", "show_photo": "Mostrar Foto", "add_professional_experience": "Agregar Experiencia Profesional", "add_academic_experience": "Añadir Experiencia Académica", "add_skills_experience": "Agregar Habilidades", "add_certificates_experience": "Agregar Certificados",
                 "generate_cv": "Generar CV", "load_json": "Cargar Datos", "save_changes": "Guardar Cambios", "clear_data": "Limpiar Datos",
                 "professional_experience": "Experiencia Profesional", "academic_experience": "Experiencia Académica",
                 "skills": "Habilidades", "certificates": "Certificados", "language_toggle": "Switch to English",
                 "company": "Empresa", "position": "Puesto", "start_date": "Fecha de inicio", "end_date": "Fecha de fin", "description": "Descripción",
-                "institution": "Institución", "degree": "Título", "new_skill": "Nueva Habilidad", "remove": "Eliminar", "date": "Fecha", "export_md": "Exportar como Markdown", "export_pdf": "Exportar como PDF"
+                "institution": "Institución", "degree": "Título", "new_skill": "Nueva Habilidad", "remove": "Eliminar", "date": "Fecha", "export_md": "Exportar como Markdown", "export_pdf": "Exportar como PDF",
+                "gift_coffee": "Regálame un café"
             }
         }
     
@@ -288,6 +515,7 @@ class Curriculum:
 
     def update_gui_text(self):
         """Updates all text in the GUI to match the selected language."""
+        # Update all labels
         self.language_button.config(text=self.languages[self.current_language]["language_toggle"])
         self.name_label.config(text=self.languages[self.current_language]["name"])
         self.title_label.config(text=self.languages[self.current_language]["title"])
@@ -295,8 +523,11 @@ class Curriculum:
         self.age_label.config(text=self.languages[self.current_language]["age"])
         self.city_label.config(text=self.languages[self.current_language]["city"])
         self.summary_label.config(text=self.languages[self.current_language]["summary"])
+        
+        # Update other UI elements
         self.photo_button.config(text=self.languages[self.current_language]["attach_photo"])
         self.checkbox_photo.config(text=self.languages[self.current_language]["show_photo"])
+        self.coffee_link.config(text=self.languages[self.current_language]["gift_coffee"])
 
         # Update section buttons
         self.professional_experience_button.config(text=self.languages[self.current_language]["add_professional_experience"])
@@ -309,6 +540,8 @@ class Curriculum:
         self.save_button.config(text=self.languages[self.current_language]["save_changes"])
         self.generate_button.config(text=self.languages[self.current_language]["generate_cv"])
         self.clear_button.config(text=self.languages[self.current_language]["clear_data"])
+        self.export_md_button.config(text=self.languages[self.current_language]["export_md"])
+        self.export_pdf_button.config(text=self.languages[self.current_language]["export_pdf"])
 
         # Refresh the preview to reflect language changes
         self.update_preview()
@@ -323,11 +556,32 @@ class Curriculum:
             self.set_data_modified(True)
 
     def add_professional_experience(self):
-        """Adds a professional experience entry."""
+        """
+        Adds a new professional experience to the CV.
+        
+        Example:
+            experience = {
+                'company': 'Tech Corp',
+                'position': 'Senior Developer',
+                'start_date': '2020-01',
+                'end_date': '2023-12',
+                'description': 'Development of web applications'
+            }
+        """
         self.add_entry_to_list("professional_experience", "company", "position", "start_date", "end_date", "description")
 
     def add_academic_experience(self):
-        """Adds an academic experience entry."""
+        """
+        Adds an academic experience entry.
+        
+        Example:
+            experience = {
+                'institution': 'University of Technology',
+                'degree': 'Master of Science',
+                'start_date': '2018-09',
+                'end_date': '2022-06'
+            }
+        """
         self.add_entry_to_list("academic_experience", "institution", "degree", "start_date", "end_date")
 
     def add_skill(self):
@@ -414,15 +668,38 @@ class Curriculum:
 
         window = tk.Toplevel(self.root)
         window.title(f"{self.languages[self.current_language][list_name]}")
+        
+        # Consistent style for input fields in the popup window
+        entry_style = {
+            'font': (self.style['font_family'], 10),
+            'relief': 'solid',
+            'borderwidth': 1,
+            'highlightthickness': 0,
+            'bg': '#ffffff'
+        }
+        
         entries = {}
         for i, field in enumerate(fields):
             tk.Label(window, text=self.languages[self.current_language][field]).grid(row=i, column=0, padx=10, pady=5)
-            entries[field] = tk.Entry(window)
-            entries[field].grid(row=i, column=1, padx=10, pady=5)
-        tk.Button(window, text=self.languages[self.current_language]["save_changes"], command=save_entry).grid(row=len(fields), column=1, padx=10, pady=10)
+            entries[field] = tk.Entry(window, **entry_style)
+            entries[field].grid(row=i, column=1, padx=10, pady=5, sticky="ew")
+
+        tk.Button(window, text=self.languages[self.current_language]["save_changes"], 
+                 command=save_entry,
+                 bg=self.style['accent_color'],
+                 fg='#ffffff',
+                 relief='flat',
+                 font=(self.style['font_family'], 10)).grid(row=len(fields), column=1, padx=10, pady=10)
 
     def load_json_file(self):
-        """Loads data from a selected JSON file."""
+        """
+        Loads data from a JSON file.
+        
+        Error Handling:
+            - FileNotFoundError: File not found
+            - JSONDecodeError: Invalid JSON format
+            - PermissionError: No read permissions
+        """
         file_path = filedialog.askopenfilename(title="Select a JSON file", filetypes=[("JSON files", "*.json")])
         if file_path:
             self.data_file = file_path
@@ -463,7 +740,17 @@ class Curriculum:
         self.update_preview()
 
     def update_preview(self):
-        """Updates the preview area."""
+        """
+        Updates the preview area.
+        
+        This method:
+        1. Clears the current preview
+        2. Rebuilds all sections of the CV
+        3. Updates the scroll region of the canvas
+        
+        Raises:
+            TclError: If there are issues with the GUI
+        """
         for widget in self.preview_content.winfo_children():
             widget.destroy()
         self.add_personal_information_section()
@@ -744,6 +1031,17 @@ class Curriculum:
             academic_experience=self.academic_experience,
             skills=self.skills, certificates=self.certificates
         )
+
+    def _apply_button_hover(self, button):
+        """Aplica efecto hover a un botón."""
+        def on_enter(e):
+            button['bg'] = '#1a7a8c'  # Un tono más oscuro del color principal
+
+        def on_leave(e):
+            button['bg'] = self.style['accent_color']
+
+        button.bind("<Enter>", on_enter)
+        button.bind("<Leave>", on_leave)
 
 if __name__ == "__main__":
     curriculum = Curriculum()
