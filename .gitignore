@@ -1,0 +1,3 @@
+.venv/
+cv_generator.egg-info/
+curriculum_data.json

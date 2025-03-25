@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: cv-generator
-Version: 0.1.0
+Version: 1.0.2
 Summary: A Python application to generate CVs
 Requires-Python: >=3.11.5
 License-File: LICENSE

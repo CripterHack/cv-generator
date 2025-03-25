@@ -1,256 +1,401 @@
 # Generador de CV 📄✨
 
-Generador de CV es una aplicación Python que permite a los usuarios crear, editar y exportar currículum vitae (CV) profesionales de manera sencilla. La aplicación proporciona una interfaz gráfica intuitiva para introducir información personal, experiencia laboral, educación, habilidades y certificados.
+Una aplicación moderna full-stack para crear y gestionar CVs profesionales con interfaces web y de escritorio.
 
-## Características 🌟
+## Tabla de Contenidos
+1. [Características](#características)
+2. [Requisitos del Sistema](#requisitos-del-sistema)
+3. [Inicio Rápido](#inicio-rápido)
+4. [Configuración de Desarrollo](#configuración-de-desarrollo)
+   - [Configuración del Entorno](#configuración-del-entorno)
+   - [Herramientas de Desarrollo](#herramientas-de-desarrollo)
+   - [Configuración del Sistema de Tipos](#configuración-del-sistema-de-tipos)
+5. [Estructura del Proyecto](#estructura-del-proyecto)
+6. [Problemas Comunes](#problemas-comunes)
+7. [Contribuir](#contribuir)
+8. [Documentación](#documentación)
+9. [Licencia](#licencia)
+
+## Características
 
 - Soporte bilingüe (Inglés y Español) 🌎
-- Interfaz gráfica fácil de usar 🖥️
-- Vista previa en tiempo real del contenido del CV 👀
-- Opciones de exportación:
-  - Formato HTML 🌐
-  - Formato PDF 📑
-  - Formato Markdown ⬇️
-- Guardar y cargar datos del CV en formato JSON 💾
-- Importar datos de CV previamente guardados desde archivos JSON 📤
+- Vista previa en tiempo real 👀
+- Múltiples formatos de exportación:
+  - HTML 🌐
+  - PDF 📑
+  - Markdown ⬇️
+- Guardar/cargar datos de CV (JSON) 💾
 - Secciones personalizables:
   - Información Personal 👤
   - Experiencia Profesional 💼
   - Experiencia Académica 🎓
   - Habilidades 🛠️
   - Certificados 🏆
-- Opción para incluir foto de perfil 🖼️
+- Soporte para foto de perfil 🖼️
 
-## Requisitos 📋
+### Características Técnicas
+- Stack tecnológico moderno:
+  - Frontend: React + TypeScript + Material-UI
+  - Backend: FastAPI + Python
+  - Caché: Redis
+  - Contenedores: Docker
+- Funcionalidad avanzada:
+  - Múltiples plantillas de CV
+  - Validación de formularios
+  - Multi-idioma (i18n)
+  - Vista previa en tiempo real
 
-- Python 3.11.5 (requerido)
-- Tkinter (incluido con Python)
-- Pillow>=9.5.0
-- Jinja2>=3.1.2
-- pdfkit>=1.0.0
-- markdown2>=2.4.8
-- reportlab>=3.6.12
+## Requisitos del Sistema
 
-## Compatibilidad con Versiones de Python ⚠️
+- Python 3.11.5
+- Node.js 18+
+- Docker 20.10.0+
+- Docker Compose 2.0.0+
+- wkhtmltopdf 0.12.6+
+- 4GB RAM mínimo
+- 10GB espacio libre en disco
 
-Este proyecto está específicamente diseñado para funcionar con Python 3.11.5. El uso de otras versiones puede provocar problemas de compatibilidad o comportamientos inesperados. Recomendamos usar exactamente esta versión para la mejor experiencia.
+### Configuración por Plataforma
 
-## Configuración del Entorno Virtual 🔧
+<details>
+<summary>Configuración Windows</summary>
 
-1. Primero, asegúrate de tener Python 3.11.5 instalado. Puedes verificar tu versión de Python con:
+```bash
+# Instalar WSL2 si no está instalado
+wsl --install
+
+# Instalar Chocolatey (PowerShell como Admin)
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# Instalar dependencias
+choco install python nodejs docker-desktop wkhtmltopdf git
+```
+</details>
+
+<details>
+<summary>Configuración macOS</summary>
+
+```bash
+# Instalar Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Instalar dependencias
+brew install python@3.11 node docker wkhtmltopdf git
+```
+</details>
+
+<details>
+<summary>Configuración Linux</summary>
+
+```bash
+# Actualizar e instalar
+sudo apt update
+sudo apt install -y python3.11 nodejs docker.io docker-compose wkhtmltopdf git
+```
+</details>
+
+## Inicio Rápido
+
+1. Clonar y configurar:
    ```bash
-   python --version
-   ```
-
-2. Instala virtualenv si aún no lo tienes:
-   ```bash
-   pip install virtualenv
-   ```
-
-3. Crea un nuevo entorno virtual:
-   ```bash
-   # Windows
-   python -m venv venv
-
-   # Linux/Mac
-   python3 -m venv venv
-   ```
-
-4. Activa el entorno virtual:
-   ```bash
-   # Windows
-   .\venv\Scripts\activate
-
-   # Linux/Mac
-   source venv/bin/activate
-   ```
-
-5. Instala las dependencias requeridas:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-6. Cuando termines, desactiva el entorno virtual:
-   ```bash
-   deactivate
-   ```
-
-## Instalación 🚀
-
-1. Clona este repositorio:
-   ```
    git clone https://github.com/yourusername/cv-generator.git
-   ```
-
-2. Navega al directorio del proyecto:
-   ```
    cd cv-generator
    ```
 
-3. Instala las dependencias requeridas:
-   ```
-   pip install -r requirements.txt
-   ```
-
-## Uso 🔧
-
-Ejecuta la aplicación ejecutando el script principal de Python:
-```
-python cv_generator.py
-```
-
-Se abrirá la interfaz gráfica, permitiéndote introducir la información de tu CV. Utiliza los diversos botones y campos para añadir tus datos personales, experiencia laboral, educación, habilidades y certificados.
-
-## Exportar tu CV 📤
-
-Una vez que hayas introducido tu información, puedes exportar tu CV en varios formatos:
-
-- Haz clic en "Generar CV" para crear una versión HTML de tu CV.
-- Usa "Exportar como PDF" para guardar tu CV como archivo PDF.
-- Selecciona "Exportar como Markdown" para obtener una versión Markdown de tu CV.
-
-## Guardar, Cargar e Importar Datos 💾
-
-- Haz clic en "Guardar Cambios" para guardar los datos actuales de tu CV en un archivo JSON.
-- Usa "Cargar Datos" para cargar información de CV previamente guardada.
-- Haz clic en "Importar JSON" para importar datos de CV desde un archivo JSON previamente guardado.
-
-## Crear un Ejecutable 🖥️
-
-Para crear un archivo ejecutable desde el script de Python, sigue estos pasos:
-
-1. Instala PyInstaller:
-   ```
-   pip install pyinstaller
+2. Configurar entorno:
+   ```bash
+   cp web/backend/.env.example web/backend/.env
+   cp web/frontend/.env.example web/frontend/.env
    ```
 
-2. Navega al directorio del proyecto:
-   ```
-   cd ruta/hacia/cv-generator
-   ```
-
-3. Ejecuta PyInstaller:
-   ```
-   pyinstaller --onefile --windowed cv-generator.py
+3. Iniciar entorno de desarrollo:
+   ```bash
+   chmod +x dev.sh  # Sistemas Unix
+   ./dev.sh start
    ```
 
-4. Encuentra el ejecutable en la carpeta `dist`.
+## Configuración de Desarrollo
 
-## Lista de Tareas Pendientes 📝
+### Usando DevContainers (Recomendado)
 
-- [ ] Añadir soporte para más idiomas
-- [ ] Implementar plantillas personalizadas de CV
-- [ ] Crear una versión web de la aplicación
-- [ ] Añadir integración con LinkedIn para importación fácil de datos
-- [ ] Implementar un corrector ortográfico para el contenido del CV
-- [ ] Añadir opción para incluir código QR en el CV
-- [ ] Crear una versión para aplicación móvil
-- [ ] Implementar sugerencias de CV basadas en IA
-- [ ] Añadir soporte para CV en video
-- [ ] Implementar control de versiones para ediciones de CV
-- [ ] Traducción automática del CV
+#### Prerrequisitos
+1. Visual Studio Code
+2. Extensión "Dev Containers" en VS Code
+3. Docker Desktop (Windows/Mac) o Docker Engine (Linux)
+4. Git
 
-## Pruebas 🧪
+#### Pasos de Configuración
 
-### Entornos Probados:
-- Windows 11, Python 3.11.5
+1. **Configuración Inicial**
+   ```bash
+   # Clonar el repositorio
+   git clone https://github.com/yourusername/cv-generator.git
+   cd cv-generator
 
-### Pruebas Unitarias
-- Ejecutar: `python -m unittest tests/`
+   # Copiar archivos de entorno
+   cp web/backend/.env.example web/backend/.env
+   cp web/frontend/.env.example web/frontend/.env
+   ```
 
-### Funcionalidades Probadas:
-- Creación y edición de CV
-- Exportación a HTML, PDF y Markdown
-- Guardado y carga de datos JSON
-- Importación de datos JSON
-- Cambio de idioma
+2. **Abrir en DevContainer**
+   - Abrir VS Code
+   - Presionar `F1` o `Ctrl+Shift+P`
+   - Escribir "Dev Containers: Open Folder in Container"
+   - Seleccionar la carpeta del proyecto
 
-### Pruebas de Integración
-- Verificar generación de PDF
-- Validar importación/exportación JSON
-- Comprobar persistencia de datos
+3. **Esperar la Construcción**
+   - El contenedor se construirá automáticamente
+   - VS Code se reconectará al contenedor
+   - Las extensiones se instalarán automáticamente
 
-### Por Probar:
-- Rendimiento con CV muy grandes
-- Compatibilidad con versiones anteriores de Python
-- Comportamiento en sistemas con recursos limitados
-- Creación de ejecutables multiplataforma
-- Estilizado de foto de perfil
+4. **Iniciar Servicios**
+   ```bash
+   # Dar permisos de ejecución al script de desarrollo (si es necesario)
+   chmod +x dev.sh
 
-### Cobertura de Código
-- Usar coverage.py: `coverage run -m unittest discover`
-- Generar informe: `coverage report`
+   # Iniciar todos los servicios
+   ./dev.sh start
+   ```
 
-## Problemas Comunes y Soluciones 🔨
+5. **Verificar la Ejecución**
+   - Backend API: http://localhost:8000
+   - Frontend: http://localhost:3000
+   - Documentación API: http://localhost:8000/docs
 
-### 1. ModuleNotFoundError: No module named 'tkinter'
-**Solución:** Tkinter viene con Python pero puede necesitar instalación separada en Linux:
+#### Comandos Útiles para Desarrollo
 ```bash
-sudo apt-get install python3-tk
+# Reiniciar servicios
+./dev.sh restart
+
+# Ver logs
+./dev.sh logs
+
+# Detener servicios
+./dev.sh stop
+
+# Ejecutar pruebas
+./dev.sh test
+
+# Limpiar contenedores y caché
+./dev.sh clean
 ```
 
-### 2. Error de Dependencias de pdfkit
-**Solución:** Instalar wkhtmltopdf:
+#### Solución de Problemas
+
+<details>
+<summary>Problemas con Puertos</summary>
+
 ```bash
-# Windows
-# Descargar e instalar desde: https://wkhtmltopdf.org/downloads.html
+# Verificar puertos en uso
+sudo lsof -i :8000
+sudo lsof -i :3000
 
-# Linux
-sudo apt-get install wkhtmltopdf
-
-# Mac
-brew install wkhtmltopdf
+# Detener procesos si es necesario
+sudo kill -9 <PID>
 ```
+</details>
 
-### 3. Problemas de Instalación de Pillow
-**Solución:** Instalar primero las dependencias del sistema:
+<details>
+<summary>Problemas con Permisos de Docker</summary>
+
 ```bash
-# Linux
-sudo apt-get install python3-dev python3-setuptools libtiff5-dev libjpeg8-dev libopenjp2-7-dev zlib1g-dev \
-    libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python3-tk
-
-# Luego reinstalar Pillow
-pip uninstall Pillow
-pip install Pillow
+# Agregar usuario al grupo docker (Linux)
+sudo usermod -aG docker $USER
+newgrp docker
 ```
+</details>
 
-### 4. Fallo en la Activación del Entorno Virtual
-**Solución:** Si tienes errores de permisos:
+<details>
+<summary>Problemas con Node Modules</summary>
+
 ```bash
-# Windows PowerShell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Dentro del contenedor
+cd web/frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+</details>
 
-# Linux/Mac
-chmod +x venv/bin/activate
+<details>
+<summary>Actualización de Dependencias</summary>
+
+```bash
+# Reconstruir contenedor
+./dev.sh rebuild
+```
+</details>
+
+### Configuración Manual (Alternativa)
+
+```bash
+# Backend (.env)
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG=True
+REDIS_HOST=172.19.0.2
+REDIS_PORT=6379
+
+# Frontend (.env)
+REACT_APP_API_URL=http://localhost:8000
 ```
 
-## Arquitectura del Proyecto 🏗️
+### Herramientas de Desarrollo
 
-- `cv-generator.py`: Archivo principal que contiene la lógica de la aplicación
-- `curriculum_data.json`: Archivo plantilla para almacenar datos del CV
-- `requirements.txt`: Dependencias del proyecto
-- `.devcontainer/`: Configuración del contenedor de desarrollo
+1. **Calidad de Código**
+   - Linting: `npm run lint`
+   - Formateo: `npm run format`
+   - Verificación de tipos: `npm run type-check`
 
-## Estructura de Datos 📊
+2. **Pruebas**
+   - Ejecutar pruebas: `npm test`
+   - Cobertura: `npm run test:coverage`
 
-El CV está estructurado en las siguientes secciones principales:
-- Información Personal
-- Experiencia Profesional
-- Experiencia Académica
-- Habilidades y Capacidades
-- Certificados
+3. **Construcción y Análisis**
+   - Construcción para producción: `npm run build`
+   - Análisis de bundle: `npm run analyze`
 
-Cada sección maneja su propio formato específico de datos, documentado en `curriculum_data.json`.
+### Configuración del Sistema de Tipos
 
-## Contribuir 🤝
+```bash
+# Instalar definiciones de tipos principales
+npm install --save-dev @types/react @types/react-dom @types/node
+npm install --save-dev @types/axios @types/i18next
+npm install --save-dev @types/jest @types/testing-library__react
 
-¡Las contribuciones son bienvenidas! No dudes en enviar un Pull Request.
+# Verificar instalaciones
+npm ls | grep "@types"
+```
 
-## Licencia 📜
+## Comandos Disponibles
+
+### Comandos de Desarrollo
+- `npm start` - Iniciar servidor de desarrollo
+- `npm run dev` - Iniciar servidor de desarrollo con recarga en caliente
+- `npm run build` - Crear build de producción
+- `npm run build:prod` - Crear build de producción con entorno de producción
+
+### Comandos de Pruebas
+- `npm test` - Ejecutar pruebas en modo observador
+- `npm run test:coverage` - Ejecutar pruebas con reporte de cobertura
+- `npm run test:ci` - Ejecutar pruebas en modo CI (una sola vez)
+
+### Comandos de Calidad de Código
+- `npm run lint` - Verificar problemas de estilo de código
+- `npm run lint:fix` - Corregir problemas de estilo de código automáticamente
+- `npm run format` - Formatear código con Prettier
+- `npm run format:check` - Verificar formato del código
+- `npm run type-check` - Verificar tipos de TypeScript
+- `npm run type-check:watch` - Verificar tipos de TypeScript en modo observador
+
+### Comandos de Análisis
+- `npm run analyze` - Analizar tamaño del bundle con source-map-explorer
+- `npm run clean` - Eliminar directorios de build y caché
+- `npm run ci` - Ejecutar todas las verificaciones (tipos, lint, pruebas) - usado en CI
+
+### Comandos de Documentación
+- `npm run storybook` - Iniciar servidor de desarrollo de Storybook
+- `npm run build-storybook` - Construir documentación estática de Storybook
+
+### Hooks de Git
+- `npm run prepare` - Instalar hooks de git con husky
+- `npm run precommit` - Ejecutar verificaciones pre-commit (ejecutado automáticamente por husky)
+
+### Ejemplos
+```bash
+# Iniciar desarrollo
+npm run dev
+
+# Ejecutar pruebas con cobertura
+npm run test:coverage
+
+# Verificar y corregir estilo de código
+npm run lint:fix
+npm run format
+
+# Preparar para producción
+npm run build:prod
+
+# Ejecutar todas las verificaciones antes de commit
+npm run ci
+```
+
+## Estructura del Proyecto
+
+```
+cv-generator/
+├── web/
+│   ├── frontend/          # Aplicación React
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── services/
+│   │   │   ├── i18n/
+│   │   │   └── types/
+│   │   └── public/
+│   └── backend/          # Aplicación FastAPI
+├── shared/              # Utilidades compartidas
+├── docker/             # Configuración de Docker
+└── tests/              # Suites de pruebas
+```
+
+## Problemas Comunes
+
+<details>
+<summary>Problemas de TypeScript/Linter</summary>
+
+- Declaraciones de módulos faltantes:
+  ```bash
+  rm -rf node_modules package-lock.json
+  npm install
+  ```
+- Errores de verificación de tipos:
+  ```bash
+  npm run type-check
+  npm run lint:fix
+  ```
+</details>
+
+<details>
+<summary>Problemas de Docker</summary>
+
+- Errores de permisos:
+  ```bash
+  sudo usermod -aG docker $USER  # Linux/macOS
+  ```
+- Problemas de caché:
+  ```bash
+  docker system prune -a
+  docker-compose build --no-cache
+  ```
+</details>
+
+<details>
+<summary>Problemas del Servidor de Desarrollo</summary>
+
+- Hot reload no funciona:
+  ```bash
+  npm run dev
+  # O con Docker
+  ./dev.sh restart
+  ```
+</details>
+
+## Contribuir
+
+1. Fork y clonar
+2. Crear rama de funcionalidad
+3. Realizar cambios
+4. Ejecutar pruebas y linting
+5. Enviar pull request
+
+Para guías detalladas, ver [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Documentación
+
+- Documentación API: Endpoint `/docs`
+- Documentación Frontend: Generada con Storybook
+- Documentación Código: Documentación inline y hints de tipos
+
+## Licencia
 
 Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
-
-## Agradecimientos 🙏
-
-- Un agradecimiento especial a los desarrolladores de las bibliotecas utilizadas en este proyecto.
-- Gracias a la comunidad de código abierto por las herramientas y recursos que hicieron posible este proyecto. 
+  

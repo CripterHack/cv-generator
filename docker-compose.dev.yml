@@ -1,0 +1,66 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./web/frontend
+      target: development
+    volumes:
+      - ./web/frontend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    depends_on:
+      - backend
+    networks:
+      - cv-network
+
+  backend:
+    build:
+      context: ./web/backend
+      target: development
+    volumes:
+      - ./web/backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - DEBUG=True
+      - REDIS_HOST=172.19.0.2
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - cv-network
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - cv-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis
+    networks:
+      - cv-network
+
+networks:
+  cv-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+    driver: local

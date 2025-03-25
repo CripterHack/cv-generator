@@ -1,0 +1,123 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11.5'
+          
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r web/backend/requirements.txt
+          pip install pytest-cov
+          
+      - name: Run backend tests
+        run: |
+          pytest tests/ --cov=web/backend --cov=shared --cov-report=xml
+          
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          file: ./coverage.xml
+          flags: backend
+
+  frontend-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          
+      - name: Install dependencies
+        working-directory: ./web/frontend
+        run: npm install
+        
+      - name: Run frontend tests
+        working-directory: ./web/frontend
+        run: npm run test:coverage
+        
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          file: ./web/frontend/coverage/lcov.info
+          flags: frontend
+
+  lint:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.11.5'
+          
+      - name: Install Python linting tools
+        run: |
+          pip install black flake8
+          
+      - name: Run Python linting
+        run: |
+          black --check web/backend shared
+          flake8 web/backend shared
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+          
+      - name: Install Node.js linting tools
+        working-directory: ./web/frontend
+        run: |
+          npm install
+          
+      - name: Run TypeScript linting
+        working-directory: ./web/frontend
+        run: npm run lint
+
+  build:
+    needs: [backend-tests, frontend-tests, lint]
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        
+      - name: Build backend
+        run: docker build -t cv-generator-backend -f docker/backend.Dockerfile .
+        
+      - name: Build frontend
+        run: docker build -t cv-generator-frontend -f docker/frontend.Dockerfile .
+        
+      - name: Build Redis
+        run: docker build -t cv-generator-redis -f docker/redis.Dockerfile .

@@ -1,26 +1,67 @@
 FROM mcr.microsoft.com/vscode/devcontainers/python:3.11
 
-# Install wkhtmltopdf and X11/GUI dependencies
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends \
+# Instalar Node.js y herramientas adicionales
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get update \
+    && apt-get install -y nodejs netcat-traditional \
+    && npm install -g npm@latest \
+    && (which yarn || npm install -g yarn)
+
+# Instalar Docker CLI
+RUN apt-get update && apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release \
+    && curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list \
+    && apt-get update \
+    && apt-get install -y docker-ce-cli
+
+# Instalar dependencias del sistema con cleanup
+RUN apt-get update && apt-get install -y \
     wkhtmltopdf \
-    python3-tk \
-    python3-pil.imagetk \
-    libx11-6 \
-    x11-utils \
-    xauth \
-    libxext6 \
-    libxrender1 \
-    libxtst6 \
-    libxi6 \
+    xvfb \
+    libgl1-mesa-glx \
+    git \
+    curl \
+    wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install additional Python packages
-RUN pip install --no-cache-dir black pylint
+# Crear usuario no root y configurar Docker
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
 
-# Create the workspace directory
+RUN if ! getent group docker >/dev/null; then \
+    groupadd docker; \
+    fi \
+    && if ! getent group vscode >/dev/null; then \
+    groupadd --gid 1000 vscode; \
+    fi \
+    && if ! getent passwd vscode >/dev/null; then \
+    useradd --uid 1000 --gid 1000 -m vscode; \
+    fi \
+    && usermod -aG docker vscode \
+    && apt-get update \
+    && apt-get install -y sudo \
+    && echo vscode ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/vscode \
+    && chmod 0440 /etc/sudoers.d/vscode
+
+# Configurar el directorio de trabajo
 WORKDIR /workspace
+
+# Instalar herramientas de desarrollo Python
+RUN pip install --no-cache-dir black pylint mypy pytest coverage
+
+# Configurar git para el usuario vscode
+USER $USERNAME
+RUN git config --global core.editor "code --wait" \
+    && git config --global init.defaultBranch main
+
+USER root
 
 # Copy requirements
 COPY requirements.txt /tmp/pip-tmp/

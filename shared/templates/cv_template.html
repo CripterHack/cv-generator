@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="{{ lang | default('en') }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ name }} - CV</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 210mm;
+            margin: 0 auto;
+            padding: 20mm;
+            background-color: white;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 2em;
+        }
+        header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 1em;
+        }
+        h1 {
+            color: #2292a7;
+            margin: 0;
+            font-size: 2.5em;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #2292a7;
+            padding-bottom: 0.5em;
+            margin-top: 1.5em;
+        }
+        .contact-info {
+            margin: 1em 0;
+            font-size: 0.9em;
+        }
+        .summary {
+            margin: 2em 0;
+            font-style: italic;
+        }
+        .experience-item, .education-item, .certificate-item {
+            margin-bottom: 1.5em;
+        }
+        .experience-item h3, .education-item h3 {
+            color: #2292a7;
+            margin-bottom: 0.5em;
+        }
+        .date {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1em;
+            margin-top: 1em;
+        }
+        .skill {
+            background-color: #f0f0f0;
+            padding: 0.5em 1em;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        @media print {
+            body {
+                padding: 0;
+            }
+            .no-print {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        {% if show_photo and photo_base64 %}
+        <img src="{{ photo_base64 }}" alt="{{ name }}" />
+        {% endif %}
+        <h1>{{ name }}</h1>
+        <h2>{{ title }}</h2>
+        <div class="contact-info">
+            {% if phone %}{{ phone }}{% endif %}
+            {% if age %} | {{ age }} años{% endif %}
+            {% if city %} | {{ city }}{% endif %}
+        </div>
+    </header>
+
+    {% if summary %}
+    <div class="summary">
+        {{ summary }}
+    </div>
+    {% endif %}
+
+    {% if professional_experience %}
+    <section>
+        <h2>Professional Experience</h2>
+        {% for exp in professional_experience %}
+        <div class="experience-item">
+            <h3>{{ exp.position }} at {{ exp.company }}</h3>
+            <div class="date">{{ exp.start_date }} - {{ exp.end_date or 'Present' }}</div>
+            {% if exp.description %}
+            <p>{{ exp.description }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if academic_experience %}
+    <section>
+        <h2>Education</h2>
+        {% for edu in academic_experience %}
+        <div class="education-item">
+            <h3>{{ edu.degree }}</h3>
+            <div>{{ edu.institution }}</div>
+            <div class="date">{{ edu.start_date }} - {{ edu.end_date or 'Present' }}</div>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+
+    {% if skills %}
+    <section>
+        <h2>Skills</h2>
+        <div class="skills">
+            {% for skill in skills %}
+            <span class="skill">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if certificates %}
+    <section>
+        <h2>Certificates</h2>
+        {% for cert in certificates %}
+        <div class="certificate-item">
+            <h3>{{ cert.name }}</h3>
+            <div>{{ cert.institution }}</div>
+            <div class="date">{{ cert.date }}</div>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+</body>
+</html> 

@@ -1,256 +1,417 @@
 # CV Generator 📄✨
 
-CV Generator is a Python application that allows users to create, edit, and export professional curricula vitae (CVs) with ease. The application provides a user-friendly graphical interface for inputting personal information, work experience, education, skills, and certificates.
+A modern, full-stack application for creating and managing professional CVs with both web and desktop interfaces.
 
-## Features 🌟
+## Table of Contents
+1. [Features](#features)
+2. [System Requirements](#system-requirements)
+3. [Quick Start](#quick-start)
+4. [Development Setup](#development-setup)
+   - [Environment Configuration](#environment-configuration)
+   - [Development Tools](#development-tools)
+   - [Type System Setup](#type-system-setup)
+   - [Using DevContainers (Recommended)](#using-devcontainers-recommended)
+5. [Project Structure](#project-structure)
+6. [Common Issues](#common-issues)
+7. [Contributing](#contributing)
+8. [Documentation](#documentation)
+9. [License](#license)
+
+## Features
 
 - Bilingual support (English and Spanish) 🌎
-- Easy-to-use graphical user interface 🖥️
-- Real-time preview of CV content 👀
-- Export options:
-  - HTML format 🌐
-  - PDF format 📑
-  - Markdown format ⬇️
-- Save and load CV data in JSON format 💾
-- Import previously saved CV data from JSON files 📤
+- Real-time CV preview 👀
+- Multiple export formats:
+  - HTML 🌐
+  - PDF 📑
+  - Markdown ⬇️
+- Save/load CV data (JSON) 💾
 - Customizable sections:
   - Personal Information 👤
   - Professional Experience 💼
   - Academic Experience 🎓
   - Skills 🛠️
   - Certificates 🏆
-- Option to include a profile photo 🖼️
+- Profile photo support 🖼️
 
-## Requirements 📋
+### Technical Features
+- Modern tech stack:
+  - Frontend: React + TypeScript + Material-UI
+  - Backend: FastAPI + Python
+  - Cache: Redis
+  - Containers: Docker
+- Advanced functionality:
+  - Multiple CV templates
+  - Form validation
+  - Multi-language (i18n)
+  - Real-time preview
 
-- Python 3.11.5 (required)
-- Tkinter (included with Python)
-- Pillow>=9.5.0
-- Jinja2>=3.1.2
-- pdfkit>=1.0.0
-- markdown2>=2.4.8
-- reportlab>=3.6.12
+## System Requirements
 
-## Python Version Compatibility ⚠️
+- Python 3.11.5
+- Node.js 18+
+- Docker 20.10.0+
+- Docker Compose 2.0.0+
+- wkhtmltopdf 0.12.6+
+- 4GB RAM minimum
+- 10GB free disk space
 
-This project is specifically designed to work with Python 3.11.5. Using other versions may lead to compatibility issues or unexpected behavior. We recommend using exactly this version for the best experience.
+### Platform-Specific Setup
 
-## Virtual Environment Setup 🔧
+<details>
+<summary>Windows Setup</summary>
 
-1. First, ensure you have Python 3.11.5 installed. You can check your Python version with:
+```bash
+# Install WSL2 if not installed
+wsl --install
+
+# Install Chocolatey (PowerShell as Admin)
+Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+# Install dependencies
+choco install python nodejs docker-desktop wkhtmltopdf git
+```
+</details>
+
+<details>
+<summary>macOS Setup</summary>
+
+```bash
+# Install Homebrew
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+# Install dependencies
+brew install python@3.11 node docker wkhtmltopdf git
+```
+</details>
+
+<details>
+<summary>Linux Setup</summary>
+
+```bash
+# Update and install
+sudo apt update
+sudo apt install -y python3.11 nodejs docker.io docker-compose wkhtmltopdf git
+```
+</details>
+
+## Quick Start
+
+1. Clone and setup:
    ```bash
-   python --version
-   ```
-
-2. Install virtualenv if you haven't already:
-   ```bash
-   pip install virtualenv
-   ```
-
-3. Create a new virtual environment:
-   ```bash
-   # Windows
-   python -m venv venv
-
-   # Linux/Mac
-   python3 -m venv venv
-   ```
-
-4. Activate the virtual environment:
-   ```bash
-   # Windows
-   .\venv\Scripts\activate
-
-   # Linux/Mac
-   source venv/bin/activate
-   ```
-
-5. Install the required dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-6. When you're done, deactivate the virtual environment:
-   ```bash
-   deactivate
-   ```
-
-## Installation 🚀
-
-1. Clone this repository:
-   ```
    git clone https://github.com/yourusername/cv-generator.git
-   ```
-
-2. Navigate to the project directory:
-   ```
    cd cv-generator
    ```
 
-3. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-
-## Usage 🔧
-
-Run the application by executing the main Python script:
-```
-python cv_generator.py
-```
-
-The graphical interface will open, allowing you to input your CV information. Use the various buttons and fields to add your personal details, work experience, education, skills, and certificates.
-
-## Exporting Your CV 📤
-
-Once you've entered your information, you can export your CV in several formats:
-
-- Click "Generate CV" to create an HTML version of your CV.
-- Use "Export as PDF" to save your CV as a PDF file.
-- Select "Export as Markdown" to get a Markdown version of your CV.
-
-## Saving, Loading, and Importing Data 💾
-
-- Click "Save Changes" to save your current CV data to a JSON file.
-- Use "Load Data" to load previously saved CV information.
-- Click "Import JSON" to import CV data from a previously saved JSON file.
-
-## Creating an Executable 🖥️
-
-To create an executable file from the Python script, follow these steps:
-
-1. Install PyInstaller:
-   ```
-   pip install pyinstaller
+2. Configure environment:
+   ```bash
+   cp web/backend/.env.example web/backend/.env
+   cp web/frontend/.env.example web/frontend/.env
    ```
 
-2. Navigate to the project directory:
-   ```
-   cd path/to/cv-generator
-   ```
-
-3. Run PyInstaller:
-   ```
-   pyinstaller --onefile --windowed cv-generator.py
+3. Start development environment:
+   ```bash
+   chmod +x dev.sh  # Unix-like systems
+   ./dev.sh start
    ```
 
-4. Find the executable in the `dist` folder.
+## Development Setup
 
-## To-Do List 📝
+### Environment Configuration
 
-- [ ] Add support for more languages
-- [ ] Implement custom CV templates
-- [ ] Create a web-based version of the application
-- [ ] Add integration with LinkedIn for easy data import
-- [ ] Implement a spell-checker for CV content
-- [ ] Add option to include QR code in CV
-- [ ] Create a mobile app version
-- [ ] Implement AI-powered CV suggestions
-- [ ] Add support for video CVs
-- [ ] Implement version control for CV edits
-- [ ] Automatically language translation for the CV
-
-## Testing 🧪
-
-### Tested Environments:
-- Windows 11, Python 3.11.5
-
-### Unit Tests
-- Run: `python -m unittest tests/`
-
-### Tested Functionalities:
-- CV creation and editing
-- Exporting to HTML, PDF, and Markdown
-- Saving and loading JSON data
-- Importing JSON data
-- Bilingual switching
-
-### Integration Tests
-- Verify PDF generation
-- Validate JSON import/export
-- Check data persistence
-
-### To Be Tested:
-- Performance with very large CVs
-- Compatibility with older Python versions
-- Behavior on low-resource systems
-- Cross-platform executable creation
-- Profile photo styling
-
-### Code Coverage
-- Use coverage.py: `coverage run -m unittest discover`
-- Generate report: `coverage report`
-
-## Common Issues and Solutions 🔨
-
-### 1. ModuleNotFoundError: No module named 'tkinter'
-**Solution:** Tkinter comes with Python but might need separate installation on Linux:
 ```bash
-sudo apt-get install python3-tk
+# Backend (.env)
+API_HOST=0.0.0.0
+API_PORT=8000
+DEBUG=True
+REDIS_HOST=172.19.0.2
+REDIS_PORT=6379
+
+# Frontend (.env)
+REACT_APP_API_URL=http://localhost:8000
 ```
 
-### 2. pdfkit Dependencies Error
-**Solution:** Install wkhtmltopdf:
+### Development Tools
+
+1. **Code Quality**
+   - Linting: `npm run lint`
+   - Formatting: `npm run format`
+   - Type checking: `npm run type-check`
+
+2. **Testing**
+   - Run tests: `npm test`
+   - Coverage: `npm run test:coverage`
+
+3. **Build and Analysis**
+   - Production build: `npm run build`
+   - Bundle analysis: `npm run analyze`
+
+### Type System Setup
+
 ```bash
-# Windows
-# Download and install from: https://wkhtmltopdf.org/downloads.html
+# Install core type definitions
+npm install --save-dev @types/react @types/react-dom @types/node
+npm install --save-dev @types/axios @types/i18next
+npm install --save-dev @types/jest @types/testing-library__react
 
-# Linux
-sudo apt-get install wkhtmltopdf
-
-# Mac
-brew install wkhtmltopdf
+# Verify installations
+npm ls | grep "@types"
 ```
 
-### 3. Pillow Installation Issues
-**Solution:** Install system dependencies first:
+### Available Commands
+
+#### Development Commands
+- `npm start` - Start development server
+- `npm run dev` - Start development server with hot reload
+- `npm run build` - Create production build
+- `npm run build:prod` - Create production build with production environment
+
+#### Testing Commands
+- `npm test` - Run tests in watch mode
+- `npm run test:coverage` - Run tests with coverage report
+- `npm run test:ci` - Run tests in CI mode (single run)
+
+#### Code Quality Commands
+- `npm run lint` - Check code style issues
+- `npm run lint:fix` - Fix code style issues automatically
+- `npm run format` - Format code with Prettier
+- `npm run format:check` - Check code formatting
+- `npm run type-check` - Check TypeScript types
+- `npm run type-check:watch` - Check TypeScript types in watch mode
+
+#### Analysis Commands
+- `npm run analyze` - Analyze bundle size with source-map-explorer
+- `npm run clean` - Remove build directories and cache
+- `npm run ci` - Run all checks (types, lint, tests) - used in CI
+
+#### Documentation Commands
+- `npm run storybook` - Start Storybook development server
+- `npm run build-storybook` - Build static Storybook documentation
+
+#### Git Hooks
+- `npm run prepare` - Install husky git hooks
+- `npm run precommit` - Run pre-commit checks (automatically run by husky)
+
+#### Examples
 ```bash
-# Linux
-sudo apt-get install python3-dev python3-setuptools libtiff5-dev libjpeg8-dev libopenjp2-7-dev zlib1g-dev \
-    libfreetype6-dev liblcms2-dev libwebp-dev tcl8.6-dev tk8.6-dev python3-tk
+# Start development
+npm run dev
 
-# Then reinstall Pillow
-pip uninstall Pillow
-pip install Pillow
+# Run tests with coverage
+npm run test:coverage
+
+# Check and fix code style
+npm run lint:fix
+npm run format
+
+# Prepare for production
+npm run build:prod
+
+# Run all checks before committing
+npm run ci
 ```
 
-### 4. Virtual Environment Activation Fails
-**Solution:** If you get permission errors:
+### Using DevContainers (Recommended)
+
+#### Prerequisites
+1. Visual Studio Code
+2. "Dev Containers" extension in VS Code
+3. Docker Desktop (Windows/Mac) or Docker Engine (Linux)
+4. Git
+
+#### Setup Steps
+
+1. **Initial Setup**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/yourusername/cv-generator.git
+   cd cv-generator
+
+   # Copy environment files
+   cp web/backend/.env.example web/backend/.env
+   cp web/frontend/.env.example web/frontend/.env
+   ```
+
+2. **Open in DevContainer**
+   - Open VS Code
+   - Press `F1` or `Ctrl+Shift+P`
+   - Type "Dev Containers: Open Folder in Container"
+   - Select the project folder
+
+3. **Wait for Build**
+   - Container will build automatically
+   - VS Code will reconnect to container
+   - Extensions will install automatically
+
+4. **Start Services**
+   ```bash
+   # Grant execution permissions to dev script (if needed)
+   chmod +x dev.sh
+
+   # Start all services
+   ./dev.sh start
+   ```
+
+5. **Verify Execution**
+   - Backend API: http://localhost:8000
+   - Frontend: http://localhost:3000
+   - API Documentation: http://localhost:8000/docs
+
+#### Useful Development Commands
 ```bash
-# Windows PowerShell
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Restart services
+./dev.sh restart
 
-# Linux/Mac
-chmod +x venv/bin/activate
+# View logs
+./dev.sh logs
+
+# Stop services
+./dev.sh stop
+
+# Run tests
+./dev.sh test
+
+# Clean containers and cache
+./dev.sh clean
 ```
 
-## Project Architecture 🏗️
+#### Troubleshooting
 
-- `cv-generator.py`: Main file containing the application logic
-- `curriculum_data.json`: Template file for storing CV data
-- `requirements.txt`: Project dependencies
-- `.devcontainer/`: Development container configuration
+<details>
+<summary>Port Issues</summary>
 
-## Data Structure 📊
+```bash
+# Check ports in use
+sudo lsof -i :8000
+sudo lsof -i :3000
 
-The CV is structured in the following main sections:
-- Personal Information
-- Professional Experience
-- Academic Experience
-- Skills and Abilities
-- Certificates
+# Kill processes if needed
+sudo kill -9 <PID>
+```
+</details>
 
-Each section handles its own specific data format, documented in `curriculum_data.json`.
+<details>
+<summary>Docker Permission Issues</summary>
 
-## Contributing 🤝
+```bash
+# Add user to docker group (Linux)
+sudo usermod -aG docker $USER
+newgrp docker
+```
+</details>
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+<details>
+<summary>Node Modules Issues</summary>
 
-## License 📜
+```bash
+# Inside the container
+cd web/frontend
+rm -rf node_modules package-lock.json
+npm install
+```
+</details>
+
+<details>
+<summary>Dependency Updates</summary>
+
+```bash
+# Rebuild container
+./dev.sh rebuild
+```
+</details>
+
+### Manual Setup (Alternative)
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/cv-generator.git
+cd cv-generator
+
+# Copy environment files
+cp web/backend/.env.example web/backend/.env
+cp web/frontend/.env.example web/frontend/.env
+
+# Start development environment
+chmod +x dev.sh
+./dev.sh start
+```
+
+## Project Structure
+
+```
+cv-generator/
+├── web/
+│   ├── frontend/          # React application
+│   │   ├── src/
+│   │   │   ├── components/
+│   │   │   ├── services/
+│   │   │   ├── i18n/
+│   │   │   └── types/
+│   │   └── public/
+│   └── backend/          # FastAPI application
+├── shared/              # Shared utilities
+├── docker/             # Docker configuration
+└── tests/              # Test suites
+```
+
+## Common Issues
+
+<details>
+<summary>TypeScript/Linter Issues</summary>
+
+- Missing module declarations:
+  ```bash
+  rm -rf node_modules package-lock.json
+  npm install
+  ```
+- Type checking errors:
+  ```bash
+  npm run type-check
+  npm run lint:fix
+  ```
+</details>
+
+<details>
+<summary>Docker Issues</summary>
+
+- Permission errors:
+  ```bash
+  sudo usermod -aG docker $USER  # Linux/macOS
+  ```
+- Cache problems:
+  ```bash
+  docker system prune -a
+  docker-compose build --no-cache
+  ```
+</details>
+
+<details>
+<summary>Development Server Issues</summary>
+
+- Hot reload not working:
+  ```bash
+  npm run dev
+  # Or with Docker
+  ./dev.sh restart
+  ```
+</details>
+
+## Contributing
+
+1. Fork and clone
+2. Create feature branch
+3. Make changes
+4. Run tests and linting
+5. Submit pull request
+
+For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)
+
+## Documentation
+
+- API Documentation: `/docs` endpoint
+- Frontend Documentation: Generated with Storybook
+- Code Documentation: Inline documentation and type hints
+
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgments 🙏
-
-- Special thanks to the developers of the libraries used in this project.
-- Thanks to the open-source community for the tools and resources that made this project possible.

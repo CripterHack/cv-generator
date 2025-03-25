@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+# Iniciar Redis
+cd /workspaces/cv-generator
+if [ ! $(docker ps -q -f name=redis) ]; then
+    echo "📦 Iniciando Redis..."
+    docker-compose -f .devcontainer/docker-compose.yml up -d redis
+    echo "⏳ Esperando a que Redis esté listo..."
+    sleep 5
+fi
+
+# Iniciar backend
+cd /workspaces/cv-generator/web/backend
+if ! lsof -i:8000; then
+    echo "🔧 Iniciando backend..."
+    python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
+    echo "⏳ Esperando a que el backend esté listo..."
+    sleep 5
+fi
+
+# Iniciar frontend
+cd /workspaces/cv-generator/web/frontend
+if ! lsof -i:3000; then
+    echo "🌐 Iniciando frontend..."
+    npm start &
+fi
+
+# Mantener el script en ejecución
+wait
