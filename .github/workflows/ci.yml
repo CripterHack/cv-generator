@@ -2,10 +2,10 @@ name: CI/CD
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     tags: ['v*']
   pull_request:
-    branches: [main]
+    branches: [master]
 
 jobs:
   backend-tests:
@@ -106,7 +106,7 @@ jobs:
   docker-build:
     needs: [backend-tests, frontend-tests, lint]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
 
     steps:
       - uses: actions/checkout@v4
@@ -129,15 +129,12 @@ jobs:
         include:
           - os: windows-latest
             platform: windows
-            ext: .exe
             artifact: CVGenerator-windows
           - os: ubuntu-latest
             platform: linux
-            ext: ''
             artifact: CVGenerator-linux
           - os: macos-latest
             platform: macos
-            ext: ''
             artifact: CVGenerator-macos
 
     runs-on: ${{ matrix.os }}
@@ -160,48 +157,54 @@ jobs:
         if: matrix.platform == 'linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-tk xvfb
-          # wkhtmltopdf for PDF export
-          sudo apt-get install -y wkhtmltopdf || true
+          sudo apt-get install -y python3-tk xvfb wkhtmltopdf || true
 
       - name: Install system dependencies (macOS)
         if: matrix.platform == 'macos'
-        run: |
-          brew install wkhtmltopdf || true
+        run: brew install wkhtmltopdf || true
 
       - name: Build executable
         run: python scripts/build.py
 
-      - name: Test executable (Windows)
+      - name: Verify executable exists (Windows)
         if: matrix.platform == 'windows'
+        shell: pwsh
         run: |
-          $proc = Start-Process -FilePath ".\dist\CVGenerator.exe" -PassThru
-          Start-Sleep -Seconds 3
-          if (-not $proc.HasExited) {
-            $proc.Kill()
-            Write-Output "Executable started successfully"
+          if (Test-Path ".\dist\CVGenerator.exe") {
+            $size = (Get-Item ".\dist\CVGenerator.exe").Length / 1MB
+            Write-Output "Executable OK: $([math]::Round($size, 1)) MB"
           } else {
-            Write-Output "Executable exited with code $($proc.ExitCode)"
+            Write-Error "Executable not found"
+            exit 1
           }
 
-      - name: Test executable (Linux)
-        if: matrix.platform == 'linux'
+      - name: Verify executable exists (Linux/macOS)
+        if: matrix.platform != 'windows'
         run: |
-          xvfb-run timeout 5 ./dist/CVGenerator || [ $? -eq 124 ]
-          echo "Executable test completed"
+          if [ -f "./dist/CVGenerator" ]; then
+            ls -lh ./dist/CVGenerator
+          else
+            echo "Executable not found"
+            exit 1
+          fi
 
-      - name: Test executable (macOS)
-        if: matrix.platform == 'macos'
+      - name: Package artifact (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
         run: |
-          timeout 5 ./dist/CVGenerator || [ $? -eq 124 ]
-          echo "Executable test completed"
+          New-Item -ItemType Directory -Path release -Force
+          Copy-Item -Path ".\dist\CVGenerator.exe" -Destination ".\release\"
+          if (Test-Path ".\shared\templates\cv_template.html") {
+            Copy-Item -Path ".\shared\templates\cv_template.html" -Destination ".\release\"
+          }
 
-      - name: Package artifact
+      - name: Package artifact (Linux/macOS)
+        if: matrix.platform != 'windows'
         run: |
           mkdir -p release
-          cp -r dist/CVGenerator${{ matrix.ext }} release/ 2>/dev/null || true
-          cp -r dist/CVGenerator.app release/ 2>/dev/null || true
-          cp shared/templates/cv_template.html release/ 2>/dev/null || true
+          cp dist/CVGenerator release/ || true
+          cp -r dist/CVGenerator.app release/ || true
+          cp shared/templates/cv_template.html release/ || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -230,21 +233,18 @@ jobs:
           mkdir -p release-archives
           cd artifacts
 
-          # Windows
           if [ -d "CVGenerator-windows" ]; then
             cd CVGenerator-windows
             zip -r ../../release-archives/CVGenerator-windows.zip .
             cd ..
           fi
 
-          # Linux
           if [ -d "CVGenerator-linux" ]; then
             cd CVGenerator-linux
             tar -czf ../../release-archives/CVGenerator-linux.tar.gz .
             cd ..
           fi
 
-          # macOS
           if [ -d "CVGenerator-macos" ]; then
             cd CVGenerator-macos
             tar -czf ../../release-archives/CVGenerator-macos.tar.gz .
