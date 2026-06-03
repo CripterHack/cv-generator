@@ -177,9 +177,6 @@ class Curriculum:
                 data = json.load(f)
                 self.update_fields_from_json(data)
         except FileNotFoundError:
-            # If the file does not exist, simply initialize with empty values
-            messagebox.showwarning(
-                "File Not Found", f"Could not find the data file at {self.data_file}.")
             pass
         except json.JSONDecodeError:
             messagebox.showerror("Error", "The file is corrupted or empty.")
