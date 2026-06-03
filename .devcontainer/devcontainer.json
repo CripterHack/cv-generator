@@ -37,7 +37,6 @@
     "postStartCommand": "bash .devcontainer/startup.sh",
     "remoteUser": "vscode",
     "features": {
-        "docker-in-docker": "latest",
         "docker-from-docker": {
             "version": "latest",
             "moby": true,
@@ -45,10 +44,6 @@
         }
     },
     "runArgs": [
-        "--init",
-        "--privileged"
+        "--init"
     ],
-    "mounts": [
-        "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
-    ]
 }

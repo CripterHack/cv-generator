@@ -6,7 +6,7 @@ REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # Start Redis if not running
 if ! docker ps -q -f name=cv_redis | grep -q .; then
     echo "📦 Starting Redis..."
-    docker-compose -f "$REPO_ROOT/.devcontainer/docker-compose.yml" up -d redis
+    docker compose -f "$REPO_ROOT/.devcontainer/docker-compose.yml" up -d redis
     echo "⏳ Waiting for Redis..."
     sleep 5
 fi
