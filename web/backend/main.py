@@ -23,9 +23,9 @@ app.add_middleware(
 
 # Configurar Redis
 redis_client = redis.Redis(
-    host=os.getenv("REDIS_HOST", "172.19.0.2"),
+    host=os.getenv("REDIS_HOST", "localhost"),
     port=int(os.getenv("REDIS_PORT", 6379)),
-    password=os.getenv("REDIS_PASSWORD", "RedisPassword123!"),
+    password=os.getenv("REDIS_PASSWORD") or None,
     decode_responses=True
 )
 
@@ -47,4 +47,4 @@ async def root():
     }
 
 # Incluir los endpoints de CV
-app.include_router(cv_endpoints.router)
+app.include_router(cv_endpoints.router, prefix="/api")

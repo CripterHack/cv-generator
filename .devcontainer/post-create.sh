@@ -366,23 +366,27 @@ fi
 # Configurar entornos
 echo "⚙️ Configurando variables de entorno..."
 
-# Backend
-cat > ../backend/.env << EOL
+# Backend (only if .env doesn't exist)
+if [ ! -f ../backend/.env ]; then
+    cat > ../backend/.env << EOL
 API_HOST=0.0.0.0
 API_PORT=8000
 DEBUG=True
-REDIS_HOST=172.19.0.2
+REDIS_HOST=localhost
 REDIS_PORT=6379
-REDIS_PASSWORD=RedisPassword123!
+REDIS_PASSWORD=
 CORS_ORIGINS=["http://localhost:3000"]
 EOL
+fi
 
-# Frontend
-cat > ../frontend/.env << EOL
+# Frontend (only if .env doesn't exist)
+if [ ! -f ../frontend/.env ]; then
+    cat > ../frontend/.env << EOL
 REACT_APP_API_URL=http://localhost:8000
 REACT_APP_DEFAULT_LANGUAGE=es
 REACT_APP_ENABLE_MOCK_API=false
 EOL
+fi
 
 # Crear y configurar scripts de desarrollo
 echo "📝 Creando scripts de desarrollo..."

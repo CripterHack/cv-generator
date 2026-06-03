@@ -1,31 +1,29 @@
 #!/bin/bash
-
 set -e
 
-# Iniciar Redis
-cd /workspaces/cv-generator
-if [ ! $(docker ps -q -f name=redis) ]; then
-    echo "📦 Iniciando Redis..."
-    docker-compose -f .devcontainer/docker-compose.yml up -d redis
-    echo "⏳ Esperando a que Redis esté listo..."
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
+# Start Redis if not running
+if ! docker ps -q -f name=cv_redis | grep -q .; then
+    echo "📦 Starting Redis..."
+    docker-compose -f "$REPO_ROOT/.devcontainer/docker-compose.yml" up -d redis
+    echo "⏳ Waiting for Redis..."
     sleep 5
 fi
 
-# Iniciar backend
-cd /workspaces/cv-generator/web/backend
-if ! lsof -i:8000; then
-    echo "🔧 Iniciando backend..."
+# Start backend
+cd "$REPO_ROOT/web/backend"
+if ! nc -z localhost 8000 2>/dev/null; then
+    echo "🔧 Starting backend..."
     python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
-    echo "⏳ Esperando a que el backend esté listo..."
-    sleep 5
+    sleep 3
 fi
 
-# Iniciar frontend
-cd /workspaces/cv-generator/web/frontend
-if ! lsof -i:3000; then
-    echo "🌐 Iniciando frontend..."
+# Start frontend
+cd "$REPO_ROOT/web/frontend"
+if ! nc -z localhost 3000 2>/dev/null; then
+    echo "🌐 Starting frontend..."
     npm start &
 fi
 
-# Mantener el script en ejecución
 wait

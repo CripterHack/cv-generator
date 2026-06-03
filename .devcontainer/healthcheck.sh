@@ -7,21 +7,25 @@ check_service() {
     local max_attempts=$3
     local attempt=1
 
-    echo "Verificando $service en puerto $port..."
+    echo "Verifying $service on port $port..."
     while ! nc -z localhost $port; do
         if [ $attempt -eq $max_attempts ]; then
-            echo "❌ $service no está disponible después de $max_attempts intentos"
+            echo "❌ $service not available after $max_attempts attempts"
             return 1
         fi
-        echo "⏳ Intento $attempt de $max_attempts..."
+        echo "⏳ Attempt $attempt of $max_attempts..."
         sleep 2
         ((attempt++))
     done
-    echo "✅ $service está funcionando correctamente"
+    echo "✅ $service is running"
     return 0
 }
 
-# Verificar servicios
-check_service "Frontend" 3000 5
-check_service "Backend" 8000 5
-check_service "Redis" 6379 5 
+# Redis is the only auto-started service in the DevContainer
+check_service "Redis" 6379 5
+
+# Check optional services (may not be running)
+echo ""
+echo "Optional services (start manually if needed):"
+nc -z localhost 8000 2>/dev/null && echo "✅ Backend (port 8000) is running" || echo "ℹ️  Backend (port 8000) not running — start with: cd web/backend && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+nc -z localhost 3000 2>/dev/null && echo "✅ Frontend (port 3000) is running" || echo "ℹ️  Frontend (port 3000) not running — start with: cd web/frontend && npm start"

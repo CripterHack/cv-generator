@@ -29,7 +29,7 @@ services:
       - API_HOST=0.0.0.0
       - API_PORT=8000
       - DEBUG=True
-      - REDIS_HOST=172.19.0.2
+      - REDIS_HOST=redis
       - REDIS_PORT=6379
     depends_on:
       - redis

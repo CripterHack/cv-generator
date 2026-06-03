@@ -9,11 +9,9 @@ services:
     networks:
       - cv-network
     restart: unless-stopped
-    command: redis-server --appendonly yes --requirepass RedisPassword123!
-    environment:
-      - REDIS_PASSWORD=RedisPassword123!
+    command: redis-server --appendonly yes
     healthcheck:
-      test: [ "CMD", "redis-cli", "-a", "RedisPassword123!", "ping" ]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5

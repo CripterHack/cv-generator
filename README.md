@@ -141,61 +141,32 @@ REACT_APP_API_URL=http://localhost:8000
 2. **Testing**
    - Run tests: `npm test`
    - Coverage: `npm run test:coverage`
+   - CI mode: `npm run test:ci`
 
-3. **Build and Analysis**
+3. **Build**
    - Production build: `npm run build`
-   - Bundle analysis: `npm run analyze`
-
-### Type System Setup
-
-```bash
-# Install core type definitions
-npm install --save-dev @types/react @types/react-dom @types/node
-npm install --save-dev @types/axios @types/i18next
-npm install --save-dev @types/jest @types/testing-library__react
-
-# Verify installations
-npm ls | grep "@types"
-```
 
 ### Available Commands
 
 #### Development Commands
 - `npm start` - Start development server
-- `npm run dev` - Start development server with hot reload
 - `npm run build` - Create production build
-- `npm run build:prod` - Create production build with production environment
 
 #### Testing Commands
 - `npm test` - Run tests in watch mode
-- `npm run test:coverage` - Run tests with coverage report
-- `npm run test:ci` - Run tests in CI mode (single run)
+- `npm run test:coverage` - Run tests with coverage report (single run)
+- `npm run test:ci` - Run tests in CI mode (single run, no coverage)
 
 #### Code Quality Commands
 - `npm run lint` - Check code style issues
 - `npm run lint:fix` - Fix code style issues automatically
 - `npm run format` - Format code with Prettier
-- `npm run format:check` - Check code formatting
 - `npm run type-check` - Check TypeScript types
-- `npm run type-check:watch` - Check TypeScript types in watch mode
-
-#### Analysis Commands
-- `npm run analyze` - Analyze bundle size with source-map-explorer
-- `npm run clean` - Remove build directories and cache
-- `npm run ci` - Run all checks (types, lint, tests) - used in CI
-
-#### Documentation Commands
-- `npm run storybook` - Start Storybook development server
-- `npm run build-storybook` - Build static Storybook documentation
-
-#### Git Hooks
-- `npm run prepare` - Install husky git hooks
-- `npm run precommit` - Run pre-commit checks (automatically run by husky)
 
 #### Examples
 ```bash
 # Start development
-npm run dev
+npm start
 
 # Run tests with coverage
 npm run test:coverage
@@ -205,10 +176,7 @@ npm run lint:fix
 npm run format
 
 # Prepare for production
-npm run build:prod
-
-# Run all checks before committing
-npm run ci
+npm run build
 ```
 
 ### Using DevContainers (Recommended)
@@ -404,12 +372,9 @@ cv-generator/
 4. Run tests and linting
 5. Submit pull request
 
-For detailed guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md)
-
 ## Documentation
 
-- API Documentation: `/docs` endpoint
-- Frontend Documentation: Generated with Storybook
+- API Documentation: `/docs` endpoint (Swagger UI)
 - Code Documentation: Inline documentation and type hints
 
 ## License

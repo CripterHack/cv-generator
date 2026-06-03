@@ -1,0 +1,33 @@
+.previewContainer {
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-height: 400px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.errorContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  color: #f44336;
+}
+
+.previewContent {
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.photoPreview {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 4px;
+  margin: 10px 0;
+} 

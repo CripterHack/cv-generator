@@ -1,4 +1,4 @@
-from models.cv import CV
+from ..models.cv import CV
 import pdfkit
 from jinja2 import Template
 import markdown2

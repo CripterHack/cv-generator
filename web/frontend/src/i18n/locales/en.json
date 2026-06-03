@@ -1,0 +1,51 @@
+{
+  "form": {
+    "personalInfo": "Personal Information",
+    "name": "Name",
+    "title": "Title",
+    "phone": "Phone",
+    "age": "Age",
+    "city": "City",
+    "summary": "Summary",
+    "uploadPhoto": "Upload Photo",
+    "generating": "Generating...",
+    "experienceSection": "Professional Experience",
+    "educationSection": "Education",
+    "skillsSection": "Skills",
+    "certificatesSection": "Certificates",
+    "generateCV": "Generate CV"
+  },
+  "validation": {
+    "required": "This field is required",
+    "minLength": "Must be at least {{min}} characters",
+    "maxLength": "Must not exceed {{max}} characters",
+    "invalidPhone": "Invalid phone number",
+    "invalidAge": "Age must be between 16 and 100 years",
+    "invalidEmail": "Invalid email address"
+  },
+  "errors": {
+    "photoSize": "Photo size must not exceed 5MB",
+    "photoUpload": "Error uploading photo",
+    "cvGeneration": "Error generating CV",
+    "networkError": "Network error. Please try again",
+    "unexpectedError": "An unexpected error occurred"
+  },
+  "success": {
+    "photoUploaded": "Photo uploaded successfully",
+    "cvGenerated": "CV generated successfully",
+    "dataSaved": "Data saved successfully"
+  },
+  "buttons": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "add": "Add",
+    "remove": "Remove",
+    "edit": "Edit",
+    "download": "Download",
+    "preview": "Preview"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish"
+  }
+} 

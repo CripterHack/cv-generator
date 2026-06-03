@@ -1,75 +1,34 @@
 #!/bin/bash
 set -e
 
-echo "🚀 Iniciando servicios..."
+echo "🚀 Starting DevContainer services..."
 
-# Asegurar que el usuario tenga acceso al socket de Docker
-echo "🔧 Configurando permisos de Docker..."
-sudo chmod 666 /var/run/docker.sock
-sudo usermod -aG docker vscode
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Configurar permisos de npm
-echo "🔧 Configurando permisos de npm..."
+# Ensure Docker socket access
+echo "🔧 Configuring Docker permissions..."
+sudo chmod 666 /var/run/docker.sock 2>/dev/null || true
+sudo usermod -aG docker vscode 2>/dev/null || true
+
+# Configure npm permissions
+echo "🔧 Configuring npm permissions..."
 mkdir -p /home/vscode/.npm-global
 npm config set prefix '/home/vscode/.npm-global'
 export PATH=/home/vscode/.npm-global/bin:$PATH
 
-# Instalar dependencias del backend
-echo "📦 Instalando dependencias del backend..."
-cd /workspaces/cv-generator/web/backend
-pip install --user -r requirements.txt
+# Install backend dependencies
+echo "📦 Installing backend dependencies..."
+cd "$REPO_ROOT/web/backend"
+pip install --user -r requirements.txt 2>/dev/null || pip install -r requirements.txt 2>/dev/null || true
 
-# Crear directorio api si no existe
-if [ ! -d "api" ]; then
-    mkdir -p api
-    touch api/__init__.py
-    # Crear cv_endpoints.py si no existe
-    if [ ! -f "api/cv_endpoints.py" ]; then
-        cat > api/cv_endpoints.py << EOL
-from fastapi import APIRouter
-
-router = APIRouter()
-
-@router.get("/cv")
-async def get_cv():
-    return {"message": "CV endpoint"}
-EOL
-    fi
-fi
-
-# Iniciar Redis
-echo "📦 Iniciando Redis..."
-cd /workspaces/cv-generator
+# Start Redis via DevContainer docker-compose
+echo "📦 Starting Redis..."
+cd "$REPO_ROOT"
 docker-compose -f .devcontainer/docker-compose.yml up -d redis
 
-# Esperar a que Redis esté listo
-echo "⏳ Esperando a que Redis esté listo..."
+echo "⏳ Waiting for Redis to be ready..."
 sleep 5
 
-# Iniciar backend
-# echo "🔧 Iniciando backend..."
-# cd /workspaces/cv-generator/web/backend
-# python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload &
-
-# Esperar a que el backend esté listo
-# echo "⏳ Esperando a que el backend esté listo..."
-# sleep 5
-
-# Iniciar frontend
-# echo "🌐 Iniciando frontend..."
-# cd /workspaces/cv-generator/web/frontend
-
-# Limpiar node_modules y reinstalar dependencias
-# echo "🧹 Limpiando instalación anterior..."
-# rm -rf node_modules package-lock.json
-# npm cache clean --force
-
-# echo "📦 Instalando dependencias del frontend..."
-# export NODE_OPTIONS="--max-old-space-size=4096"
-# npm install --legacy-peer-deps
-
-# echo "🚀 Iniciando aplicación frontend..."
-# BROWSER=none npm start &
-
-# Mantener el script en ejecución
-# wait
+echo "✅ Redis started. Use './dev.sh start' or run backend/frontend manually."
+echo "   Backend:  cd web/backend && python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
+echo "   Frontend: cd web/frontend && npm start"

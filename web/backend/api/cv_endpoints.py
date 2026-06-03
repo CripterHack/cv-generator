@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, File, UploadFile
 from typing import List, Optional
 from ..models.cv import CV
 import base64
+import os
 from pathlib import Path
 from datetime import datetime
 import redis
@@ -9,7 +10,13 @@ import json
 from ..services.export_service import ExportService
 
 router = APIRouter()
-redis_client = redis.Redis(host='localhost', port=6379, db=0)
+
+redis_client = redis.Redis(
+    host=os.getenv("REDIS_HOST", "localhost"),
+    port=int(os.getenv("REDIS_PORT", 6379)),
+    password=os.getenv("REDIS_PASSWORD"),
+    decode_responses=True
+)
 
 
 @router.post("/cv/")

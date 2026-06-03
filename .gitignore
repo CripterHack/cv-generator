@@ -1,3 +1,12 @@
 .venv/
 cv_generator.egg-info/
 curriculum_data.json
+__pycache__/
+*.pyc
+node_modules/
+build/
+coverage/
+.env
+!.env.example
+logs/
+*.egg-info/

@@ -1,0 +1,51 @@
+{
+  "form": {
+    "personalInfo": "Información Personal",
+    "name": "Nombre",
+    "title": "Título",
+    "phone": "Teléfono",
+    "age": "Edad",
+    "city": "Ciudad",
+    "summary": "Resumen",
+    "uploadPhoto": "Subir Foto",
+    "generating": "Generando...",
+    "generateCV": "Generar CV",
+    "experienceSection": "Experiencia Profesional",
+    "educationSection": "Educación",
+    "skillsSection": "Habilidades",
+    "certificatesSection": "Certificados"
+  },
+  "validation": {
+    "required": "Este campo es obligatorio",
+    "minLength": "Debe tener al menos {{min}} caracteres",
+    "maxLength": "No debe exceder {{max}} caracteres",
+    "invalidPhone": "Número de teléfono inválido",
+    "invalidAge": "La edad debe estar entre 16 y 100 años",
+    "invalidEmail": "Correo electrónico inválido"
+  },
+  "errors": {
+    "photoSize": "El tamaño de la foto no debe exceder 5MB",
+    "photoUpload": "Error al subir la foto",
+    "cvGeneration": "Error al generar el CV",
+    "networkError": "Error de red. Por favor, inténtelo de nuevo",
+    "unexpectedError": "Ocurrió un error inesperado"
+  },
+  "success": {
+    "photoUploaded": "Foto subida exitosamente",
+    "cvGenerated": "CV generado exitosamente",
+    "dataSaved": "Datos guardados exitosamente"
+  },
+  "buttons": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "add": "Agregar",
+    "remove": "Eliminar",
+    "edit": "Editar",
+    "download": "Descargar",
+    "preview": "Vista Previa"
+  },
+  "languages": {
+    "en": "Inglés",
+    "es": "Español"
+  }
+} 
