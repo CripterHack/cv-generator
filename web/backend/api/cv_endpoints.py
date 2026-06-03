@@ -157,7 +157,7 @@ async def upload_photo(file: UploadFile = File(...)):
     try:
         contents = await file.read()
         base64_image = base64.b64encode(contents).decode()
-        return {"photo_url": f"data:image/{file.content_type};base64,{base64_image}"}
+        return {"photo_url": f"data:{file.content_type};base64,{base64_image}"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
