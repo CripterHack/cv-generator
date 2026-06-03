@@ -1,26 +1,5 @@
-# Core dependencies
-Pillow==9.5.0
-Jinja2==3.1.2
-pdfkit==1.0.0
-markdown2==2.4.8
-reportlab==3.6.12
-
-# Web backend dependencies
-fastapi==0.68.1
-uvicorn==0.15.0
-python-multipart==0.0.5
-pydantic==1.8.2
-aiofiles==0.7.0
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-
-# Testing dependencies
-pytest==6.2.5
-pytest-asyncio==0.16.0
-pytest-cov==2.12.1
-httpx==0.19.0
-
-# Development dependencies
-black==22.3.0
-flake8==3.9.2
-mypy==0.910 
+Pillow>=9.5.0
+Jinja2>=3.1.0
+pdfkit>=1.0.0
+markdown2>=2.4.0
+reportlab>=3.6.0

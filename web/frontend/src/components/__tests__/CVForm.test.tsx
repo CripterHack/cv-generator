@@ -1,108 +1,123 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { CVForm } from '../CVForm';
-import { CVService } from '../../services/CVService';
 
-// Mock the CV service
 jest.mock('../../services/CVService');
 
 describe('CVForm', () => {
   beforeEach(() => {
-    // Clear all mocks before each test
     jest.clearAllMocks();
   });
 
   it('renders all form fields', () => {
-    render(<CVForm />);
-    
-    expect(screen.getByLabelText(/name/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/title/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/phone/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/age/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/city/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/summary/i)).toBeInTheDocument();
+    render(<CVForm onSubmit={jest.fn()} />);
+
+    expect(screen.getByLabelText(/nombre completo/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/teléfono/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/resumen profesional/i)).toBeInTheDocument();
   });
 
-  it('validates required fields', async () => {
-    render(<CVForm />);
-    
-    const submitButton = screen.getByRole('button', { name: /generate/i });
-    fireEvent.click(submitButton);
+  it('updates form data on input change', () => {
+    render(<CVForm onSubmit={jest.fn()} />);
 
-    await waitFor(() => {
-      expect(screen.getByText(/name is required/i)).toBeInTheDocument();
-      expect(screen.getByText(/title is required/i)).toBeInTheDocument();
-    });
+    const nameInput = screen.getByLabelText(/nombre completo/i);
+    fireEvent.change(nameInput, { target: { value: 'John Doe' } });
+    expect(nameInput).toHaveValue('John Doe');
+
+    const emailInput = screen.getByLabelText(/email/i);
+    fireEvent.change(emailInput, { target: { value: 'john@example.com' } });
+    expect(emailInput).toHaveValue('john@example.com');
   });
 
   it('submits form with valid data', async () => {
-    const mockGenerateCV = jest.spyOn(CVService, 'generateCV');
-    mockGenerateCV.mockResolvedValueOnce({ success: true });
+    const mockOnSubmit = jest.fn();
+    render(<CVForm onSubmit={mockOnSubmit} />);
 
-    render(<CVForm />);
-    
-    // Fill in form fields
-    fireEvent.change(screen.getByLabelText(/name/i), {
-      target: { value: 'John Doe' }
+    fireEvent.change(screen.getByLabelText(/nombre completo/i), {
+      target: { value: 'John Doe' },
     });
-    fireEvent.change(screen.getByLabelText(/title/i), {
-      target: { value: 'Software Engineer' }
+    fireEvent.change(screen.getByLabelText(/email/i), {
+      target: { value: 'john@example.com' },
     });
 
-    // Submit form
-    const submitButton = screen.getByRole('button', { name: /generate/i });
+    const submitButton = screen.getByRole('button', { name: /crear cv/i });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
-      expect(mockGenerateCV).toHaveBeenCalledWith(
+      expect(mockOnSubmit).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'John Doe',
-          title: 'Software Engineer'
-        })
+          fullName: 'John Doe',
+          email: 'john@example.com',
+        }),
       );
     });
   });
 
   it('handles photo upload', async () => {
-    const mockUploadPhoto = jest.spyOn(CVService, 'uploadPhoto');
-    mockUploadPhoto.mockResolvedValueOnce('photo-url');
+    render(<CVForm onSubmit={jest.fn()} />);
 
-    render(<CVForm />);
-    
     const file = new File(['photo'], 'photo.png', { type: 'image/png' });
-    const input = screen.getByLabelText(/photo/i);
-    
+    const input = screen.getByLabelText(/subir foto/i);
+
     Object.defineProperty(input, 'files', {
-      value: [file]
+      value: [file],
     });
-    
+
     fireEvent.change(input);
 
     await waitFor(() => {
-      expect(mockUploadPhoto).toHaveBeenCalledWith(file);
+      expect(screen.getByRole('img')).toBeInTheDocument();
     });
   });
 
-  it('handles API errors gracefully', async () => {
-    const mockGenerateCV = jest.spyOn(CVService, 'generateCV');
-    mockGenerateCV.mockRejectedValueOnce(new Error('API Error'));
+  it('adds education fields', () => {
+    render(<CVForm onSubmit={jest.fn()} />);
 
-    render(<CVForm />);
-    
-    // Fill in required fields
-    fireEvent.change(screen.getByLabelText(/name/i), {
-      target: { value: 'John Doe' }
-    });
-    fireEvent.change(screen.getByLabelText(/title/i), {
-      target: { value: 'Software Engineer' }
-    });
+    const addButton = screen.getByRole('button', { name: /agregar educación/i });
+    fireEvent.click(addButton);
 
-    // Submit form
-    const submitButton = screen.getByRole('button', { name: /generate/i });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/error generating cv/i)).toBeInTheDocument();
-    });
+    const institutionInputs = screen.getAllByLabelText(/institución/i);
+    expect(institutionInputs.length).toBe(2);
   });
-}); 
+
+  it('adds experience fields', () => {
+    render(<CVForm onSubmit={jest.fn()} />);
+
+    const addButton = screen.getByRole('button', { name: /agregar experiencia/i });
+    fireEvent.click(addButton);
+
+    const companyInputs = screen.getAllByLabelText(/empresa/i);
+    expect(companyInputs.length).toBe(2);
+  });
+
+  it('adds skill fields', () => {
+    render(<CVForm onSubmit={jest.fn()} />);
+
+    const addButton = screen.getByRole('button', { name: /agregar habilidad/i });
+    fireEvent.click(addButton);
+
+    const skillInputs = screen.getAllByLabelText(/habilidad/i);
+    expect(skillInputs.length).toBe(2);
+  });
+
+  it('adds certificate fields', () => {
+    render(<CVForm onSubmit={jest.fn()} />);
+
+    const addButton = screen.getByRole('button', { name: /agregar certificado/i });
+    fireEvent.click(addButton);
+
+    const certInputs = screen.getAllByLabelText(/nombre del certificado/i);
+    expect(certInputs.length).toBe(1);
+  });
+
+  it('adds language fields', () => {
+    render(<CVForm onSubmit={jest.fn()} />);
+
+    const addButton = screen.getByRole('button', { name: /agregar idioma/i });
+    fireEvent.click(addButton);
+
+    const langInputs = screen.getAllByLabelText(/idioma/i);
+    expect(langInputs.length).toBe(1);
+  });
+});

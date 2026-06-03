@@ -29,7 +29,12 @@ export const CVForm: React.FC<CVFormProps> = ({ onSubmit }) => {
     summary: '',
     education: [{ institution: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '' }],
     experience: [{ company: '', position: '', startDate: '', endDate: '', description: '' }],
-    skills: [{ name: '', level: 0 }]
+    skills: [{ name: '', level: 0 }],
+    certificates: [],
+    languages: [],
+    website: '',
+    linkedin: '',
+    github: '',
   });
   const [photo, setPhoto] = useState<string | null>(null);
   const [snackbar, setSnackbar] = useState({
@@ -385,6 +390,109 @@ export const CVForm: React.FC<CVFormProps> = ({ onSubmit }) => {
               </Box>
             ))}
             <Button onClick={handleAddSkill} variant="outlined">{t('Agregar Habilidad')}</Button>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6">{t('Certificados')}</Typography>
+            {formData.certificates.map((cert, index) => (
+              <Box key={index} mb={2}>
+                <TextField
+                  fullWidth
+                  label={t('Nombre del certificado')}
+                  value={cert.name}
+                  onChange={(e) => {
+                    const newCerts = [...formData.certificates];
+                    newCerts[index].name = e.target.value;
+                    setFormData((prev) => ({ ...prev, certificates: newCerts }));
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label={t('Emisor')}
+                  value={cert.issuer}
+                  onChange={(e) => {
+                    const newCerts = [...formData.certificates];
+                    newCerts[index].issuer = e.target.value;
+                    setFormData((prev) => ({ ...prev, certificates: newCerts }));
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label={t('Fecha')}
+                  value={cert.dateObtained}
+                  onChange={(e) => {
+                    const newCerts = [...formData.certificates];
+                    newCerts[index].dateObtained = e.target.value;
+                    setFormData((prev) => ({ ...prev, certificates: newCerts }));
+                  }}
+                />
+              </Box>
+            ))}
+            <Button onClick={() => setFormData((prev) => ({ ...prev, certificates: [...prev.certificates, { name: '', issuer: '', dateObtained: '' }] }))} variant="outlined">
+              {t('Agregar Certificado')}
+            </Button>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6">{t('Idiomas')}</Typography>
+            {formData.languages.map((lang, index) => (
+              <Box key={index} mb={2}>
+                <TextField
+                  fullWidth
+                  label={t('Idioma')}
+                  value={lang.name}
+                  onChange={(e) => {
+                    const newLangs = [...formData.languages];
+                    newLangs[index].name = e.target.value;
+                    setFormData((prev) => ({ ...prev, languages: newLangs }));
+                  }}
+                />
+                <TextField
+                  fullWidth
+                  label={t('Nivel')}
+                  value={lang.level}
+                  onChange={(e) => {
+                    const newLangs = [...formData.languages];
+                    newLangs[index].level = e.target.value;
+                    setFormData((prev) => ({ ...prev, languages: newLangs }));
+                  }}
+                />
+              </Box>
+            ))}
+            <Button onClick={() => setFormData((prev) => ({ ...prev, languages: [...prev.languages, { name: '', level: '' }] }))} variant="outlined">
+              {t('Agregar Idioma')}
+            </Button>
+          </Grid>
+
+          <Grid item xs={12}>
+            <Typography variant="h6">{t('Enlaces')}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              name="website"
+              label={t('Sitio web')}
+              value={formData.website}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              name="linkedin"
+              label="LinkedIn"
+              value={formData.linkedin}
+              onChange={handleInputChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              fullWidth
+              name="github"
+              label="GitHub"
+              value={formData.github}
+              onChange={handleInputChange}
+            />
           </Grid>
 
           <Grid item xs={12}>

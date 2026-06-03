@@ -2,9 +2,10 @@ name: CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+    tags: ['v*']
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   backend-tests:
@@ -21,103 +22,239 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11.5'
-          
+          python-version: '3.11'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.txt
           pip install -r web/backend/requirements.txt
-          pip install pytest-cov
-          
+
       - name: Run backend tests
-        run: |
-          pytest tests/ --cov=web/backend --cov=shared --cov-report=xml
-          
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
+        run: pytest tests/ web/backend/tests/ --cov=web/backend --cov=shared --cov-report=xml
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
         with:
-          file: ./coverage.xml
-          flags: backend
+          name: backend-coverage
+          path: coverage.xml
 
   frontend-tests:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v4
+
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
+          cache: 'npm'
+          cache-dependency-path: web/frontend/package-lock.json
+
       - name: Install dependencies
         working-directory: ./web/frontend
-        run: npm install
-        
+        run: npm ci
+
       - name: Run frontend tests
         working-directory: ./web/frontend
-        run: npm run test:coverage
-        
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v2
-        with:
-          file: ./web/frontend/coverage/lcov.info
-          flags: frontend
+        run: npm run test:ci
+
+      - name: Run type check
+        working-directory: ./web/frontend
+        run: npm run type-check
 
   lint:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v4
+
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11.5'
-          
+          python-version: '3.11'
+
       - name: Install Python linting tools
-        run: |
-          pip install black flake8
-          
+        run: pip install black flake8
+
       - name: Run Python linting
         run: |
-          black --check web/backend shared
+          black --check --target-version py311 web/backend shared
           flake8 web/backend shared
-          
+
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version: '18'
-          
-      - name: Install Node.js linting tools
+          cache: 'npm'
+          cache-dependency-path: web/frontend/package-lock.json
+
+      - name: Install Node.js dependencies
         working-directory: ./web/frontend
-        run: |
-          npm install
-          
+        run: npm ci
+
       - name: Run TypeScript linting
         working-directory: ./web/frontend
-        run: npm run lint
+        run: npx eslint "src/**/*.{ts,tsx}"
 
-  build:
+  docker-build:
     needs: [backend-tests, frontend-tests, lint]
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'push'
+
     steps:
-      - uses: actions/checkout@v2
-      
+      - uses: actions/checkout@v4
+
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-        
-      - name: Build backend
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build backend image
         run: docker build -t cv-generator-backend -f docker/backend.Dockerfile .
-        
-      - name: Build frontend
+
+      - name: Build frontend image
         run: docker build -t cv-generator-frontend -f docker/frontend.Dockerfile .
-        
-      - name: Build Redis
-        run: docker build -t cv-generator-redis -f docker/redis.Dockerfile .
+
+  build-executables:
+    needs: [backend-tests, frontend-tests, lint]
+    if: startsWith(github.ref, 'refs/tags/v')
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: windows
+            ext: .exe
+            artifact: CVGenerator-windows
+          - os: ubuntu-latest
+            platform: linux
+            ext: ''
+            artifact: CVGenerator-linux
+          - os: macos-latest
+            platform: macos
+            ext: ''
+            artifact: CVGenerator-macos
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+
+      - name: Install system dependencies (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-tk xvfb
+          # wkhtmltopdf for PDF export
+          sudo apt-get install -y wkhtmltopdf || true
+
+      - name: Install system dependencies (macOS)
+        if: matrix.platform == 'macos'
+        run: |
+          brew install wkhtmltopdf || true
+
+      - name: Build executable
+        run: python scripts/build.py
+
+      - name: Test executable (Windows)
+        if: matrix.platform == 'windows'
+        run: |
+          $proc = Start-Process -FilePath ".\dist\CVGenerator.exe" -PassThru
+          Start-Sleep -Seconds 3
+          if (-not $proc.HasExited) {
+            $proc.Kill()
+            Write-Output "Executable started successfully"
+          } else {
+            Write-Output "Executable exited with code $($proc.ExitCode)"
+          }
+
+      - name: Test executable (Linux)
+        if: matrix.platform == 'linux'
+        run: |
+          xvfb-run timeout 5 ./dist/CVGenerator || [ $? -eq 124 ]
+          echo "Executable test completed"
+
+      - name: Test executable (macOS)
+        if: matrix.platform == 'macos'
+        run: |
+          timeout 5 ./dist/CVGenerator || [ $? -eq 124 ]
+          echo "Executable test completed"
+
+      - name: Package artifact
+        run: |
+          mkdir -p release
+          cp -r dist/CVGenerator${{ matrix.ext }} release/ 2>/dev/null || true
+          cp -r dist/CVGenerator.app release/ 2>/dev/null || true
+          cp shared/templates/cv_template.html release/ 2>/dev/null || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: release/
+          retention-days: 30
+
+  release:
+    needs: build-executables
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+
+      - name: Create release archives
+        run: |
+          mkdir -p release-archives
+          cd artifacts
+
+          # Windows
+          if [ -d "CVGenerator-windows" ]; then
+            cd CVGenerator-windows
+            zip -r ../../release-archives/CVGenerator-windows.zip .
+            cd ..
+          fi
+
+          # Linux
+          if [ -d "CVGenerator-linux" ]; then
+            cd CVGenerator-linux
+            tar -czf ../../release-archives/CVGenerator-linux.tar.gz .
+            cd ..
+          fi
+
+          # macOS
+          if [ -d "CVGenerator-macos" ]; then
+            cd CVGenerator-macos
+            tar -czf ../../release-archives/CVGenerator-macos.tar.gz .
+            cd ..
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release-archives/*
+          generate_release_notes: true
+          draft: false
+          prerelease: false

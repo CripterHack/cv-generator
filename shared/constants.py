@@ -1,9 +1,11 @@
 from enum import Enum
 from typing import Dict
 
+
 class Language(str, Enum):
     EN = "en"
     ES = "es"
+
 
 LANGUAGES: Dict[str, Dict[str, Dict[str, str]]] = {
     "en": {
@@ -42,7 +44,7 @@ LANGUAGES: Dict[str, Dict[str, Dict[str, str]]] = {
             "date": "Date",
             "export_md": "Export as Markdown",
             "export_pdf": "Export as PDF",
-            "gift_coffee": "Gift me a coffee"
+            "gift_coffee": "Gift me a coffee",
         }
     },
     "es": {
@@ -81,9 +83,9 @@ LANGUAGES: Dict[str, Dict[str, Dict[str, str]]] = {
             "date": "Fecha",
             "export_md": "Exportar como Markdown",
             "export_pdf": "Exportar como PDF",
-            "gift_coffee": "Regálame un café"
+            "gift_coffee": "Regálame un café",
         }
-    }
+    },
 }
 
 # Configuración de la aplicación
@@ -101,4 +103,4 @@ ALLOWED_EXPORT_FORMATS = ["html", "pdf", "md"]
 DEFAULT_EXPORT_FORMAT = "pdf"
 
 # Configuración de la base de datos (si se necesita en el futuro)
-DATABASE_URL = "sqlite:///./cv_generator.db" 
+DATABASE_URL = "sqlite:///./cv_generator.db"

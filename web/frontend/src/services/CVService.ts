@@ -1,48 +1,45 @@
 import axios from 'axios';
-import { CVData } from '../types/cv.types';
+import { CVData, toApiFormat } from '../types/cv';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-export interface CV {
-    name: string;
-    title: string;
-    phone?: string;
-    age?: number;
-    city?: string;
-    summary?: string;
-    photo_base64?: string;
-    show_photo: boolean;
-    professional_experience: Experience[];
-    academic_experience: Education[];
-    skills: string[];
-    certificates: Certificate[];
-}
-
-interface Experience {
-    company: string;
-    position: string;
-    start_date: string;
-    end_date?: string;
-    description?: string;
-}
-
-interface Education {
-    institution: string;
-    degree: string;
-    start_date: string;
-    end_date?: string;
-}
-
-interface Certificate {
-    name: string;
-    institution: string;
-    date: string;
-}
-
 export class CVService {
-    static async generateCV(data: CV): Promise<any> {
+    static async createCV(data: CVData): Promise<any> {
         try {
-            const response = await axios.post(`${API_URL}/api/cv/generate`, data);
+            const response = await axios.post(`${API_URL}/api/cv/`, toApiFormat(data));
+            return response.data;
+        } catch (error) {
+            console.error('Error creating CV:', error);
+            throw error;
+        }
+    }
+
+    static async getCV(email: string): Promise<any> {
+        try {
+            const response = await axios.get(`${API_URL}/api/cv/${encodeURIComponent(email)}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error getting CV:', error);
+            throw error;
+        }
+    }
+
+    static async updateCV(email: string, data: CVData): Promise<any> {
+        try {
+            const response = await axios.put(
+                `${API_URL}/api/cv/${encodeURIComponent(email)}`,
+                toApiFormat(data),
+            );
+            return response.data;
+        } catch (error) {
+            console.error('Error updating CV:', error);
+            throw error;
+        }
+    }
+
+    static async generateCV(data: CVData): Promise<any> {
+        try {
+            const response = await axios.post(`${API_URL}/api/cv/generate`, toApiFormat(data));
             return response.data;
         } catch (error) {
             console.error('Error generating CV:', error);
@@ -68,14 +65,13 @@ export class CVService {
         }
     }
 
-    static async exportCV(data: CV, format: 'pdf' | 'html' | 'md'): Promise<any> {
+    static async exportCV(data: CVData, format: 'pdf' | 'html' | 'md'): Promise<any> {
         try {
-            const response = await axios.post(`${API_URL}/api/cv/export`, data, {
+            const response = await axios.post(`${API_URL}/api/cv/export`, toApiFormat(data), {
                 params: { format },
                 responseType: 'blob',
             });
 
-            // Create download link
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
@@ -100,17 +96,4 @@ export class CVService {
             throw error;
         }
     }
-
-    static async generatePreview(data: CV, template: string): Promise<string> {
-        try {
-            const response = await axios.post(`${API_URL}/api/cv/preview`, {
-                ...data,
-                template
-            });
-            return response.data.html;
-        } catch (error) {
-            console.error('Error generating preview:', error);
-            throw error;
-        }
-    }
-} 
+}

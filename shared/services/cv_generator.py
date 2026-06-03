@@ -6,14 +6,15 @@ import markdown2
 from shared.constants import TEMPLATE_DIR, ALLOWED_EXPORT_FORMATS
 from shared.utils.file_handler import FileHandler
 
+
 class CVGenerationError(Exception):
     pass
+
 
 class CVGenerator:
     def __init__(self):
         self.template_env = Environment(
-            loader=FileSystemLoader(TEMPLATE_DIR),
-            autoescape=True
+            loader=FileSystemLoader(TEMPLATE_DIR), autoescape=True
         )
         self.file_handler = FileHandler()
 
@@ -37,7 +38,7 @@ class CVGenerator:
 
         try:
             html = (await self.generate(data))["html"]
-            
+
             if format == "pdf":
                 pdf = pdfkit.from_string(html, False)
                 return {"pdf": pdf}
@@ -46,7 +47,7 @@ class CVGenerator:
             elif format == "md":
                 md = markdown2.markdown(html)
                 return {"markdown": md}
-            
+
         except Exception as e:
             raise CVGenerationError(f"Error exporting CV: {str(e)}")
 
@@ -63,13 +64,15 @@ class CVGenerator:
         except Exception as e:
             raise CVGenerationError(f"Error getting templates: {str(e)}")
 
-    async def _process_photo(self, photo_data: Optional[str], filename: str) -> Optional[str]:
+    async def _process_photo(
+        self, photo_data: Optional[str], filename: str
+    ) -> Optional[str]:
         """
         Processes and optimizes photo for CV.
         """
         if not photo_data:
             return None
-            
+
         try:
             return self.file_handler.save_photo(photo_data, filename)
         except Exception as e:

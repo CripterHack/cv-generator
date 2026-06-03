@@ -1,7 +1,6 @@
 from ..models.cv import CV
 import pdfkit
 from jinja2 import Template
-import markdown2
 import os
 from datetime import datetime
 import logging
@@ -366,23 +365,22 @@ class ExportService:
 
             # Configurar opciones de PDF
             options = {
-                'page-size': 'A4',
-                'margin-top': '0.75in',
-                'margin-right': '0.75in',
-                'margin-bottom': '0.75in',
-                'margin-left': '0.75in',
-                'encoding': "UTF-8",
-                'no-outline': None,
-                'enable-local-file-access': None,
-                'print-media-type': None,
-                'javascript-delay': '1000',
-                'no-stop-slow-scripts': None
+                "page-size": "A4",
+                "margin-top": "0.75in",
+                "margin-right": "0.75in",
+                "margin-bottom": "0.75in",
+                "margin-left": "0.75in",
+                "encoding": "UTF-8",
+                "no-outline": None,
+                "enable-local-file-access": None,
+                "print-media-type": None,
+                "javascript-delay": "1000",
+                "no-stop-slow-scripts": None,
             }
 
             # Generar nombre de archivo único
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_path = os.path.join(
-                export_dir, f"cv_{cv.email}_{timestamp}.pdf")
+            output_path = os.path.join(export_dir, f"cv_{cv.email}_{timestamp}.pdf")
 
             # Generar PDF
             logger.info(f"Generando PDF en: {output_path}")
@@ -431,8 +429,7 @@ class ExportService:
             current_time = datetime.now()
             for filename in os.listdir(export_dir):
                 filepath = os.path.join(export_dir, filename)
-                file_modified = datetime.fromtimestamp(
-                    os.path.getmtime(filepath))
+                file_modified = datetime.fromtimestamp(os.path.getmtime(filepath))
                 if (current_time - file_modified).days > max_age_days:
                     os.remove(filepath)
                     logger.info(f"Archivo antiguo eliminado: {filepath}")

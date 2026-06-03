@@ -58,10 +58,10 @@ docker-compose up                              # Production build (frontend, bac
 - **Frontend entrypoint**: `web/frontend/src/index.tsx`
 - **CV generation logic**: `shared/services/cv_generator.py` — used by both desktop and web backend
 - **Data model (backend)**: `web/backend/models/cv.py` (Pydantic v1) — required fields: `full_name`, `email` (EmailStr)
-- **Data model (frontend)**: `web/frontend/src/types/` (TypeScript) — uses `name`, `title`, `phone`, etc. (different shape than backend)
+- **Data model (frontend)**: `web/frontend/src/types/cv.ts` (TypeScript) — mirrors backend model in camelCase; includes `toApiFormat()` transform utility to convert camelCase → snake_case for API calls
 - **Export service**: `web/backend/services/export_service.py`, also `shared/utils/` for file handling
 - **i18n**: `web/frontend/src/i18n/` (frontend), inline dictionaries in `desktop/cv-generator.py` (desktop)
-- **Templates**: `shared/templates/` (Jinja2 HTML templates)
+- **Templates**: `shared/templates/` (Jinja2 HTML templates — used by desktop app with its own field names: `name`, `title`, `professional_experience`, etc.)
 - **CV data format (desktop)**: JSON with fields: name, title, phone, age, city, summary, foto_encoded, professional_experience, academic_experience, skills, certificates
 
 ## Setup Requirements
@@ -86,14 +86,41 @@ All backend endpoints are mounted under `/api`:
 ## CI Pipeline (`.github/workflows/ci.yml`)
 
 Runs on push/PR to `main`:
-1. **backend-tests**: `pytest tests/ --cov=web/backend --cov=shared`, Redis service container
-2. **frontend-tests**: `npm run test:coverage`
-3. **lint**: `black --check` + `flake8` on `web/backend` and `shared`; `npm run lint` on frontend
-4. **build**: Docker builds for all three images
+1. **backend-tests**: `pytest tests/ web/backend/tests/ --cov`, Redis service container
+2. **frontend-tests**: `npm run test:ci` + `npm run type-check`
+3. **lint**: `black --check --target-version py311` + `flake8` on `web/backend` and `shared`; `npx eslint` on frontend
+4. **docker-build**: Docker builds for all three images (on push only)
+5. **build-executables**: Multi-platform PyInstaller builds (on version tags only)
+6. **release**: GitHub Release with Windows/Linux/macOS binaries (on version tags)
+
+### Building Desktop Executables
+
+```bash
+python scripts/build.py          # Build for current platform
+python scripts/build.py clean    # Clean build artifacts
+```
+
+PyInstaller spec file: `cv-generator.spec`
+- Excludes web dependencies (FastAPI, Redis, etc.)
+- Bundles shared templates and constants
+- Windows: `dist/CVGenerator.exe` (~20MB)
+- macOS: `dist/CVGenerator.app` (app bundle)
+- Linux: `dist/CVGenerator` (single binary)
+
+### Releasing
+
+Tag a release to trigger multi-platform builds:
+```bash
+git tag v1.0.2
+git push origin v1.0.2
+```
+
+This creates a GitHub Release with downloadable archives for all three platforms.
 
 ## Gotchas
 
-- The Pydantic CV model (`web/backend/models/cv.py`) uses `full_name`/`email` as required fields — the desktop app and frontend use `name`/`title` (different schema shapes)
+- The Pydantic CV model (`web/backend/models/cv.py`) is the source of truth — the frontend mirrors it in camelCase via `web/frontend/src/types/cv.ts` and uses `toApiFormat()` to transform for API calls
+- The desktop app uses a different field schema (`name`/`title`/`professional_experience`) — the shared Jinja2 template expects this format; the web backend's export_service uses the Pydantic model directly
 - There are two separate Python requirements files: root `requirements.txt` (desktop/shared) and `web/backend/requirements.txt` (backend-specific)
 - Backend `.env` defaults to `REDIS_HOST=localhost` — Docker Compose overrides this to `redis` (service name)
 - `curriculum_data.json` is gitignored — the desktop app looks for it next to the script
